@@ -5,6 +5,7 @@ createElementConnection: aTLConnection From: aTLNodeSource to: aTLNodeTarget
 	from := self elementFromTLDrawable: aTLNodeSource.
 	to := self elementFromTLDrawable: aTLNodeTarget.
 	^ RSEdge new
+		attachPoint: RSBorderAttachPoint new;
 		shape: TSLine new;
 		from: from;
 		to: to;
