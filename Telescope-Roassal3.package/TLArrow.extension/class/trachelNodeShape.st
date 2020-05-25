@@ -1,3 +1,0 @@
-*Telescope-Roassal3
-trachelNodeShape
-	^ TLRoassal3NotSupportedFunctionalityException signal
