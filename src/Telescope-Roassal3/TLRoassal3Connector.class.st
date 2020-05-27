@@ -4,7 +4,7 @@ TODO
 Class {
 	#name : #TLRoassal3Connector,
 	#superclass : #TLViewConnector,
-	#category : #'Telescope-Roassal3-Connecctor'
+	#category : #'Telescope-Roassal3-Connector'
 }
 
 { #category : #accessing }
@@ -27,6 +27,41 @@ TLRoassal3Connector >> addElementNodeInView: aRSShape [
 	view add: aRSShape
 ]
 
+{ #category : #'generation - node' }
+TLRoassal3Connector >> borderFor: aNode style: styleSheet [
+	| color width |
+	color := styleSheet obtainValue: #borderColor inNode: aNode.
+	width := styleSheet obtainValue: #borderWidth inNode: aNode.
+	^ RSBorder new
+		color: color;
+		width: width;
+		yourself
+]
+
+{ #category : #'generation - node' }
+TLRoassal3Connector >> createBoxFor: aNode style: styleSheet [
+	| shape |
+	shape := (styleSheet
+		obtainValue: #shape
+		forEntity: aNode entity
+		inNode: aNode) roassalShape.
+	
+	shape
+		extent: 
+			(styleSheet 
+				obtainValue: #width 
+				inNode: aNode) @ 
+			(styleSheet 
+				obtainValue: #height 
+				inNode: aNode);
+		position: 0 @ 0;
+		border: (self borderFor: aNode style: styleSheet);
+		color: styleSheet backgroundColor.
+	^ TLShapeDecorator new
+		shape: shape;
+		yourself.
+]
+
 { #category : #'generation - connection' }
 TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSource to: aTLNodeTarget [
 	| from to |
@@ -34,40 +69,25 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 	to := self elementFromTLDrawable: aTLNodeTarget.
 	^ RSLine new
 		withBorderAttachPoint;
-		from: from;
-		to: to;
+		from: from children first;
+		to: to children first;
 		yourself.
 
 ]
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createElementNodeFromNode: aNode [
-	| styleSheet text shape |
+	| styleSheet text shape g |
 	styleSheet := aNode effectiveStyleSheet.
-	[ text := styleSheet
-		obtainValue: #nodeLabel
-		forEntity: aNode entity
-		inNode: aNode ]
-		on: TLStyleSheetMissingProperty
-		do: [  ].
-	shape := (styleSheet
-		obtainValue: #shape
-		forEntity: aNode entity
-		inNode: aNode) trachelNodeShape.
-	shape class = RSLabel
-		ifTrue: [ shape text: text ].
-	shape := TLShapeDecorator new
-		shape: shape;
-		yourself.
-	^ shape
-		extent:
-			(styleSheet obtainValue: #width forEntity: aNode entity inNode: aNode)
-				@
-					(styleSheet obtainValue: #height forEntity: aNode entity inNode: aNode);
-		position: 0 @ 0;
-		
-		color: styleSheet backgroundColor;
-		yourself
+	
+	shape := self createBoxFor: aNode style: styleSheet.
+	text := self createLabelFor: aNode style: styleSheet.
+
+	g := RSComposite new.
+	g add: shape.
+	text ifNotNil: [ g add: text ].
+	g adjustToChildren.
+	^ g
 ]
 
 { #category : #'generation - group' }
@@ -75,19 +95,50 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 	^ RSGroup withAll: aCollection
 ]
 
+{ #category : #'generation - node' }
+TLRoassal3Connector >> createLabelFor: aNode style: styleSheet [
+	| text  |
+	[ text := styleSheet
+		obtainValue: #nodeLabel
+		inNode: aNode ]
+		on: TLStyleSheetMissingProperty
+		do: [ :ex | ^ nil ].
+	
+	^ RSLabel new
+		text: text;
+		yourself
+]
+
 { #category : #'generation - legend' }
 TLRoassal3Connector >> createLegendFrom: legendItems [
 	"TODO"
 ]
 
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [ 
+	^ aLegendEntry
+]
+
+{ #category : #accessing }
+TLRoassal3Connector >> nodesShapesAvailableForConnector [
+	^ TLSimpleShape allSubclasses
+]
+
 { #category : #opening }
 TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [ 
-	| window |
+	| window inspector |
 	view := RSCanvas new.
-	view @ RSCanvasController new.
-	window := view open.
-	window
-		extent: aDimension;
-		setLabel: aString.
-	aTLVisualization generateWith: self
+	view @ RSCanvasController new noLegend.
+	aTLVisualization generateWith: self.
+	inspector := GTInspector new.
+	
+	window := inspector openOn: view.
+	inspector title: aString.
+	window extent: aDimension.
+	
+]
+
+{ #category : #view }
+TLRoassal3Connector >> updateViewForVisualization: aTLVisualization [
+	view signalUpdate
 ]

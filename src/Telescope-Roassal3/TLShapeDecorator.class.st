@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'shape'
 	],
-	#category : #'Telescope-Roassal3-Connecctor'
+	#category : #'Telescope-Roassal3-Connector'
 }
 
 { #category : #accessing }

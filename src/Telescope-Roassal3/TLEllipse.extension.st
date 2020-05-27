@@ -1,6 +1,6 @@
 Extension { #name : #TLEllipse }
 
 { #category : #'*Telescope-Roassal3' }
-TLEllipse class >> trachelNodeShape [
+TLEllipse class >> roassalShape [
 	^ RSEllipse new
 ]
