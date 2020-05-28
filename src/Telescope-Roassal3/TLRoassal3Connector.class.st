@@ -112,11 +112,41 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet [
 { #category : #'generation - legend' }
 TLRoassal3Connector >> createLegendFrom: legendItems [
 	"TODO"
+	
+]
+
+{ #category : #'generation - interaction' }
+TLRoassal3Connector >> generateClickInteraction: aClickInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
+	
+]
+
+{ #category : #'generation - interaction' }
+TLRoassal3Connector >> generateMouseOverInteraction: aTLMouseOverInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
+	
 ]
 
 { #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [ 
-	^ aLegendEntry
+	| entries lb |
+	entries := aLegendEntry obtainAssociations 
+		collect: [ :collection | | drawable | 
+			drawable := collection first.
+			drawable effectiveStyleSheet obtainValue: #shape inNode: drawable ].
+	lb := RSLegend new container: view.
+	entries associationsDo: [ :labelAndColor |
+		lb 
+			text: labelAndColor key
+			withShape: (labelAndColor value roassalShape 
+				noPaint;
+				withBorder;
+				extent: 20@20) ].
+	lb leyendDo: [ :s | 
+		s
+			withBorder; 
+			color: (Color white alpha: 0.7);
+			padding: 10 ].
+	lb onDemand: 'Legend'.
+	lb build.
 ]
 
 { #category : #accessing }
