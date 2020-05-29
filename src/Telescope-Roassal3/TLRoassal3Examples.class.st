@@ -66,7 +66,7 @@ TLRoassal3Examples >> createProgressShapeOn: canvas [
 
 { #category : #'as yet unclassified' }
 TLRoassal3Examples >> exampleAll [
-	<script: 'self new exampleAll open setLabel: ''Telescope Examples'' '>
+	<script: 'self new exampleAll open setLabel: ''Telescope Examples''; extent: 800@500'>
 	| canvas examples no |
 	canvas := RSCanvas new.
 	no := 
