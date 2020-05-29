@@ -38,6 +38,11 @@ TLRoassal3Connector >> borderFor: aNode style: styleSheet [
 		yourself
 ]
 
+{ #category : #'initialize-release' }
+TLRoassal3Connector >> close [
+	view morph window close
+]
+
 { #category : #'generation - node' }
 TLRoassal3Connector >> createBoxFor: aNode style: styleSheet [
 	| shape |
