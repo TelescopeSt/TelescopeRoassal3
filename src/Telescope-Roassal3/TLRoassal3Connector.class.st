@@ -125,6 +125,21 @@ TLRoassal3Connector >> generateClickInteraction: aClickInteraction onDrawable: a
 	
 ]
 
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateIconLegendEntry: aTLLegendEntry [
+ 	| img |
+	img := Form fromBinaryStream: (aTLLegendEntry iconName value: CYSFileLibrary new) readStream.
+	img := RSBitmap new
+		form: img;
+		yourself.
+	self legendBuilder
+		text: aTLLegendEntry label
+		withShape: ((RSGroup with: img) asShape
+			padding: 0@5;
+			yourself).
+	^ aTLLegendEntry
+]
+
 { #category : #'generation - interaction' }
 TLRoassal3Connector >> generateMouseOverInteraction: aTLMouseOverInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
 	
@@ -137,7 +152,7 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 		collect: [ :collection | | drawable | 
 			drawable := collection first.
 			drawable effectiveStyleSheet obtainValue: #shape inNode: drawable ].
-	lb := RSLegend new container: view.
+	lb := self legendBuilder.
 	entries associationsDo: [ :labelAndColor |
 		lb 
 			text: labelAndColor key
@@ -145,13 +160,31 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 				noPaint;
 				withBorder;
 				extent: 20@20) ].
-	lb leyendDo: [ :s | 
-		s
-			withBorder; 
-			color: (Color white alpha: 0.7);
-			padding: 10 ].
-	lb onDemand: 'Legend'.
-	lb build.
+	
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateTLHeightLegendEntry: aTLHeightLegendEntry [ 
+	^ self generateIconLegendEntry: aTLHeightLegendEntry.
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateTLWidthLegendEntry: aTLWidthLegendEntry [ 
+ 	^ self generateIconLegendEntry: aTLWidthLegendEntry.
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> legendBuilder [
+	^ view propertyAt: #lb ifAbsentPut: [ 
+		RSLegend new
+			container: view;
+			leyendDo: [ :s | 
+				s
+					withBorder; 
+					color: (Color white alpha: 0.7);
+					padding: 10 ];
+			onDemand: 'Legend';
+			yourself ].
 ]
 
 { #category : #accessing }
@@ -165,8 +198,8 @@ TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: 
 	view := RSCanvas new.
 	view @ RSCanvasController new noLegend.
 	aTLVisualization generateWith: self.
+	self legendBuilder build.
 	inspector := GTInspector new.
-	
 	window := inspector openOn: view.
 	inspector title: aString.
 	window extent: aDimension.
