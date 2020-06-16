@@ -15,8 +15,8 @@ BaselineOfTelescopeRoassal3 >> baseline: spec [
 		do: [
 			"our dependencies"
 			"https://github.com/TelescopeSt/TelescopeRoassal3/"
-			spec baseline: 'Roassal3' with: [
-				spec repository: 'github://pharo-contributions/Athens-SVG' ].
+			spec baseline: 'Roassal3' with: [ 
+				spec repository: 'github://ObjectProfile/Roassal3' ].
 			spec baseline: 'Telescope' with: [ 
 				spec repository: 'github://TelescopeSt/Telescope:v2.x.x/src' ].
 			
