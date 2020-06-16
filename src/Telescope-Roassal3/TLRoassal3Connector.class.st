@@ -43,6 +43,11 @@ TLRoassal3Connector >> close [
 	view morph window close
 ]
 
+{ #category : #accessing }
+TLRoassal3Connector >> connectionHeadShapesAvailableForConnector [
+	^ TLSimpleShape allSubclasses
+]
+
 { #category : #'generation - node' }
 TLRoassal3Connector >> createBoxFor: aNode style: styleSheet [
 	| shape |
@@ -143,6 +148,18 @@ TLRoassal3Connector >> generateIconLegendEntry: aTLLegendEntry [
 { #category : #'generation - interaction' }
 TLRoassal3Connector >> generateMouseOverInteraction: aTLMouseOverInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
 	
+]
+
+{ #category : #'generation - interaction' }
+TLRoassal3Connector >> generateMultiChoiceMenuInteraction: anInteraction onDrawable: aTLDrawable targeting: anotherDrawable [
+	"self halt."
+	"| sub |
+	sub := MenuMorph new.
+	(anInteraction choicesListForDrawable: aTLDrawable)
+		 collect: anInteraction displayBlock.
+	
+	MenuMorph new
+		add: anInteraction title subMenu: sub."
 ]
 
 { #category : #'generation-legendEntry' }
