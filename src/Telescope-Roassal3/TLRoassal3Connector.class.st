@@ -126,6 +126,17 @@ TLRoassal3Connector >> createLegendFrom: legendItems [
 ]
 
 { #category : #'generation - interaction' }
+TLRoassal3Connector >> createMenuFor: aTLSimpleNode [ 
+
+	self shouldNotImplement
+]
+
+{ #category : #'generation - node' }
+TLRoassal3Connector >> define: aRSComposite asParentFor: aCollection [ 
+	
+]
+
+{ #category : #'generation - interaction' }
 TLRoassal3Connector >> generateClickInteraction: aClickInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
 	
 ]
@@ -146,7 +157,16 @@ TLRoassal3Connector >> generateIconLegendEntry: aTLLegendEntry [
 ]
 
 { #category : #'generation - interaction' }
+TLRoassal3Connector >> generateMenuInteraction: aMenuInteraction onDrawable: aTLDrawable targetingDrawable: aTargetDrawable [
+]
+
+{ #category : #'generation - interaction' }
 TLRoassal3Connector >> generateMouseOverInteraction: aTLMouseOverInteraction onDrawable: aTLDrawable targetingDrawable: anObject [
+	
+]
+
+{ #category : #'generation - interaction' }
+TLRoassal3Connector >> generateMovedInteraction: aTLNodeMovedInteraction onDrawable: aTLSimpleNode targetingDrawable: aTLSimpleNode3 [ 
 	
 ]
 
@@ -160,6 +180,11 @@ TLRoassal3Connector >> generateMultiChoiceMenuInteraction: anInteraction onDrawa
 	
 	MenuMorph new
 		add: anInteraction title subMenu: sub."
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateNodeBackgroundLegendEntry: aTLNodeBackgroundLegendEntry [ 
+	
 ]
 
 { #category : #'generation-legendEntry' }
@@ -181,8 +206,18 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 ]
 
 { #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateTLColorLegendEntry: aTLColorLegendEntry [ 
+	^ aTLColorLegendEntry
+]
+
+{ #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateTLHeightLegendEntry: aTLHeightLegendEntry [ 
 	^ self generateIconLegendEntry: aTLHeightLegendEntry.
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateTLStyleSheetLegendEntry: aTLStyleSheetLegendEntry [ 
+	^ aTLStyleSheetLegendEntry
 ]
 
 { #category : #'generation-legendEntry' }

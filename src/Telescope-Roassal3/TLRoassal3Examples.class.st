@@ -4,6 +4,9 @@ I have examples
 Class {
 	#name : #TLRoassal3Examples,
 	#superclass : #Object,
+	#instVars : [
+		'greenExamples'
+	],
 	#category : #'Telescope-Roassal3-Examples'
 }
 
@@ -20,7 +23,6 @@ TLRoassal3Examples >> createBoxFor: method [
 		adjustToChildren;
 		popupText: 'click me!';
 		padding: 10;
-		draggable;
 		when: RSMouseClick send: #openExample: to: self.
 	
 	^ com 
@@ -42,7 +44,9 @@ TLRoassal3Examples >> createProgressShapeOn: canvas [
 		height: 10;
 		width: w;
 		withBorder;
-		popupText: (percent * 100) asInteger asString, '% Telescope examples running with Roassal3';
+		popupText: (percent * 100) asInteger asString, 
+			'% Telescope examples running without errors', String crlf,
+			total asString,'/',canvas nodes size asString ,' examples';
 		cornerRadius: 5;
 		noPaint;
 		yourself.
@@ -71,7 +75,8 @@ TLRoassal3Examples >> exampleAll [
 	canvas := RSCanvas new.
 	no := 
 		{TLDemos class >> #exampleCompositeNodeWithLabelInsideInButterfly.
-		TLDemos class >> #exampleTreeExplorerCollectionHierarchy}.
+		TLDemos class >> #exampleTreeExplorerCollectionHierarchy.
+		TLDemos class >> #exampleTwoConnectedVisualization}.
 	examples := TLDemos class methods
 		select: [ :met | met selector beginsWith: 'example' ].
 	
@@ -90,6 +95,12 @@ TLRoassal3Examples >> exampleAll [
 	^ canvas @ RSCanvasController
 ]
 
+{ #category : #initialization }
+TLRoassal3Examples >> initialize [
+	super initialize.
+	greenExamples := #().
+]
+
 { #category : #public }
 TLRoassal3Examples >> openExample: evt [
 	| shape vis met |
@@ -103,13 +114,16 @@ TLRoassal3Examples >> openExample: evt [
 
 { #category : #'as yet unclassified' }
 TLRoassal3Examples >> testExample: evt [
-	| shape res |
+	| shape res sel |
 	shape := evt shape.
 	res := nil.
-	[ res := shape model selector value: TLDemos.
+	sel := shape model selector.
+	[ res := sel value: TLDemos.
 	res open.
 	res generator close.
-	shape color: Color white. ]
+	shape color: ((greenExamples includes: sel)
+		ifTrue: [Color green]
+		ifFalse: [Color white] )]
 	on: Error
 	do: [ :ex | shape color: Color red translucent ].
 	^ res

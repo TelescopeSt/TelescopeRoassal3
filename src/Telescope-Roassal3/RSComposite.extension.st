@@ -6,6 +6,16 @@ RSComposite >> dimension [
 ]
 
 { #category : #'*Telescope-Roassal3' }
+RSComposite >> incomingAdjacentNodes [
+	^ #()
+]
+
+{ #category : #'*Telescope-Roassal3' }
 RSComposite >> occupyMaxSpace [
 	^ false
+]
+
+{ #category : #'*Telescope-Roassal3' }
+RSComposite >> outgoingAdjacentNodes [
+	^ #()
 ]
