@@ -95,6 +95,7 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 
 	g := RSComposite new.
 	g add: shape.
+	g @ TLDraggable.
 	text ifNotNil: [ g add: text ].
 	g adjustToChildren.
 	^ g
@@ -249,6 +250,7 @@ TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: 
 	| window inspector |
 	view := RSCanvas new.
 	view @ RSCanvasController new noLegend.
+	view @ TLDragPointCanvas.
 	aTLVisualization generateWith: self.
 	self legendBuilder build.
 	inspector := GTInspector new.
