@@ -98,7 +98,20 @@ TLRoassal3Examples >> exampleAll [
 { #category : #initialization }
 TLRoassal3Examples >> initialize [
 	super initialize.
-	greenExamples := #().
+	greenExamples := 
+	#(exampleAdaptNodeWidthFromLabel
+	exampleAllShapes
+	
+	"exampleConnectionStyle
+	exampleCustomMultiChoiceAction
+	exampleFLowControl
+	exampleLegend
+	exampleHighlightElements
+	exampleNameCloud
+	exampleConnectAction
+	exampleLayoutsAngle
+	exampleGradient
+	examplePopUp").
 ]
 
 { #category : #public }
@@ -122,7 +135,7 @@ TLRoassal3Examples >> testExample: evt [
 	res open.
 	res generator close.
 	shape color: ((greenExamples includes: sel)
-		ifTrue: [Color green]
+		ifTrue: [Color green translucent]
 		ifFalse: [Color white] )]
 	on: Error
 	do: [ :ex | shape color: Color red translucent ].

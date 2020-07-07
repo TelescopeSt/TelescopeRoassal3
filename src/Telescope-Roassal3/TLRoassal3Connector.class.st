@@ -90,7 +90,7 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 	| styleSheet text shape g |
 	styleSheet := aNode effectiveStyleSheet.
 	
-	shape := self createBoxFor: aNode style: styleSheet.
+	shape := self createShapeFor: aNode style: styleSheet.
 	text := self createLabelFor: aNode style: styleSheet.
 
 	g := RSComposite new.
@@ -130,6 +130,25 @@ TLRoassal3Connector >> createLegendFrom: legendItems [
 TLRoassal3Connector >> createMenuFor: aTLSimpleNode [ 
 
 	self shouldNotImplement
+]
+
+{ #category : #'generation - node' }
+TLRoassal3Connector >> createShapeFor: aNode style: styleSheet [
+	| shape |
+	shape := (styleSheet
+		obtainValue: #shape
+		forEntity: aNode entity
+		inNode: aNode) roassalShape.
+	
+	shape
+		extent: (styleSheet obtainValue: #width inNode: aNode) @ 
+			(styleSheet obtainValue: #height inNode: aNode);
+		position: 0 @ 0;
+		border: (self borderFor: aNode style: styleSheet);
+		paint: (self paintFor: aNode style: styleSheet).
+	^ TLShapeDecorator new
+		shape: shape;
+		yourself.
 ]
 
 { #category : #'generation - node' }
@@ -196,13 +215,14 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 			drawable := collection first.
 			drawable effectiveStyleSheet obtainValue: #shape inNode: drawable ].
 	lb := self legendBuilder.
-	entries associationsDo: [ :labelAndColor |
-		lb 
+	entries associationsDo: [ :labelAndColor | | com |
+		com := lb 
 			text: labelAndColor key
 			withShape: (labelAndColor value roassalShape 
 				noPaint;
 				withBorder;
-				extent: 20@20) ].
+				extent: 20@20).
+		com padding: 0@ 5 ].
 	
 ]
 
@@ -247,17 +267,24 @@ TLRoassal3Connector >> nodesShapesAvailableForConnector [
 
 { #category : #opening }
 TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [ 
-	| window inspector |
+	| window inspector lb |
 	view := RSCanvas new.
 	view @ RSCanvasController new noLegend.
 	view @ TLDragPointCanvas.
 	aTLVisualization generateWith: self.
-	self legendBuilder build.
+	lb := self legendBuilder.
+	lb shapes ifNotEmpty: [ lb build]. 
+	
 	inspector := GTInspector new.
 	window := inspector openOn: view.
 	inspector title: aString.
 	window extent: aDimension.
 	
+]
+
+{ #category : #'generation - node' }
+TLRoassal3Connector >> paintFor: aNode style: styleSheet [
+	 ^ styleSheet backgroundColor
 ]
 
 { #category : #view }
