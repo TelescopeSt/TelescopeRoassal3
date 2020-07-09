@@ -23,7 +23,8 @@ TLRoassal3Examples >> createBoxFor: method [
 		adjustToChildren;
 		popupText: 'click me!';
 		padding: 10;
-		when: RSMouseClick send: #openExample: to: self.
+		when: RSMouseClick send: #openExample: to: self;
+		when: RSMouseDoubleClick do: [:evt | evt shape model browse].
 	
 	^ com 
 ]
@@ -101,7 +102,7 @@ TLRoassal3Examples >> initialize [
 	greenExamples := 
 	#(exampleAdaptNodeWidthFromLabel
 	exampleAllShapes
-	
+	exampleBackgroundImages
 	"exampleConnectionStyle
 	exampleCustomMultiChoiceAction
 	exampleFLowControl

@@ -7,7 +7,7 @@ RSComposite >> dimension [
 
 { #category : #'*Telescope-Roassal3' }
 RSComposite >> incomingAdjacentNodes [
-	^ #()
+	^ self children first incomingAdjacentNodes collect: #parent
 ]
 
 { #category : #'*Telescope-Roassal3' }
@@ -17,5 +17,5 @@ RSComposite >> occupyMaxSpace [
 
 { #category : #'*Telescope-Roassal3' }
 RSComposite >> outgoingAdjacentNodes [
-	^ #()
+	^ self children first outgoingAdjacentNodes collect: #parent
 ]

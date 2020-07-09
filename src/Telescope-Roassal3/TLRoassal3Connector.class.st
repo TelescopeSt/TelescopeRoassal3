@@ -27,6 +27,25 @@ TLRoassal3Connector >> addElementNodeInView: aRSShape [
 	view add: aRSShape
 ]
 
+{ #category : #'generation - connection' }
+TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine [
+	| style line |
+	style := aTLStyleSheet.
+	line := aRSLine.
+	
+	line width: style width.
+	line color: style color.
+	{#head->#markerEnd:}
+		do: [ :asso | | substyle shape |
+			substyle := (style copyWithout: #(#shape)) + (style > asso key).
+			shape := substyle shape roassalShape.
+			shape color: substyle color.
+			shape size: 10.
+			line perform: asso value with: shape.
+			 ]
+	
+]
+
 { #category : #'generation - node' }
 TLRoassal3Connector >> borderFor: aNode style: styleSheet [
 	| color width |
@@ -74,15 +93,17 @@ TLRoassal3Connector >> createBoxFor: aNode style: styleSheet [
 
 { #category : #'generation - connection' }
 TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSource to: aTLNodeTarget [
-	| from to |
+	| from to line |
 	from := self elementFromTLDrawable: aTLNodeSource.
 	to := self elementFromTLDrawable: aTLNodeTarget.
-	^ RSLine new
+	
+	line := RSLine new
 		withBorderAttachPoint;
 		from: from children first;
 		to: to children first;
 		yourself.
-
+	self applyStyle: aTLConnection effectiveStyleSheet onLine: line.
+	^ line
 ]
 
 { #category : #'generation - node' }
@@ -95,9 +116,13 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 
 	g := RSComposite new.
 	g add: shape.
+	g model: aNode.
 	g @ TLDraggable.
-	text ifNotNil: [ g add: text ].
 	g adjustToChildren.
+	text ifNotNil: [ 
+		g add: text.
+		g position: 0@0 ].
+	self customizeInteractions: aNode with: g.
 	^ g
 ]
 
@@ -149,6 +174,11 @@ TLRoassal3Connector >> createShapeFor: aNode style: styleSheet [
 	^ TLShapeDecorator new
 		shape: shape;
 		yourself.
+]
+
+{ #category : #'generation - node' }
+TLRoassal3Connector >> customizeInteractions: aNode with: aRSShape [
+	aNode allInteractions do: [ :in | in onRoassalShape: aRSShape with: aNode ].
 ]
 
 { #category : #'generation - node' }
@@ -284,7 +314,13 @@ TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: 
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> paintFor: aNode style: styleSheet [
-	 ^ styleSheet backgroundColor
+	| color url |
+	color := styleSheet backgroundColor.
+	url := styleSheet attributes at: #backgroundImageUrl ifAbsent: [ nil ].
+	^ TLRoassalPaint new
+		color: color;
+		imageUrl: url asString;
+		yourself
 ]
 
 { #category : #view }
