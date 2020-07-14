@@ -15,24 +15,49 @@ TLShapeDecorator >> children [
 	^ #()
 ]
 
-{ #category : #accessing }
+{ #category : #dimension }
 TLShapeDecorator >> dimension [
 	^ shape extent
 ]
 
 { #category : #accessing }
-TLShapeDecorator >> doesNotUnderstand: aMessage [
-	^ aMessage sendTo: shape
+TLShapeDecorator >> encompassingRectangle [
+	^ shape encompassingRectangle
 ]
 
-{ #category : #accessing }
+{ #category : #dimension }
+TLShapeDecorator >> incomingAdjacentNodes [
+	| decorators |
+	decorators := shape canvas tlDecorators.
+	
+	^ shape children first incomingEdges
+		collect: [ :ed |
+			decorators at: ed from ].
+]
+
+{ #category : #dimension }
+TLShapeDecorator >> isNode [
+	^ shape isNode
+]
+
+{ #category : #dimension }
 TLShapeDecorator >> occupyMaxSpace [
 	^ false
 ]
 
-{ #category : #accessing }
-TLShapeDecorator >> renderOn: aCanvas [
-	shape renderOn: aCanvas 
+{ #category : #dimension }
+TLShapeDecorator >> outgoingAdjacentNodes [
+	| decorators |
+	decorators := shape canvas tlDecorators.
+	
+	^ shape children first outgoingEdges
+		collect: [ :ed |
+			decorators at: ed to ].
+]
+
+{ #category : #dimension }
+TLShapeDecorator >> position: aPoint [
+	shape position: aPoint
 ]
 
 { #category : #accessing }
@@ -43,4 +68,9 @@ TLShapeDecorator >> shape [
 { #category : #accessing }
 TLShapeDecorator >> shape: aRSShape [
 	shape := aRSShape
+]
+
+{ #category : #accessing }
+TLShapeDecorator >> translateBy: delta [
+	^ shape translateBy: delta
 ]

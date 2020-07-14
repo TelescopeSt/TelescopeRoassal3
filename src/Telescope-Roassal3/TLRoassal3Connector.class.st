@@ -23,8 +23,11 @@ TLRoassal3Connector >> addElementLegendInView: legend [
 ]
 
 { #category : #view }
-TLRoassal3Connector >> addElementNodeInView: aRSShape [
-	view add: aRSShape
+TLRoassal3Connector >> addElementNodeInView: aDecorator [
+	| arr |
+	arr := view tlDecorators.
+	arr at: aDecorator shape children first put: aDecorator.
+	view add: aDecorator shape.
 ]
 
 { #category : #'generation - connection' }
@@ -67,30 +70,6 @@ TLRoassal3Connector >> connectionHeadShapesAvailableForConnector [
 	^ TLSimpleShape allSubclasses
 ]
 
-{ #category : #'generation - node' }
-TLRoassal3Connector >> createBoxFor: aNode style: styleSheet [
-	| shape |
-	shape := (styleSheet
-		obtainValue: #shape
-		forEntity: aNode entity
-		inNode: aNode) roassalShape.
-	
-	shape
-		extent: 
-			(styleSheet 
-				obtainValue: #width 
-				inNode: aNode) @ 
-			(styleSheet 
-				obtainValue: #height 
-				inNode: aNode);
-		position: 0 @ 0;
-		border: (self borderFor: aNode style: styleSheet);
-		color: styleSheet backgroundColor.
-	^ TLShapeDecorator new
-		shape: shape;
-		yourself.
-]
-
 { #category : #'generation - connection' }
 TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSource to: aTLNodeTarget [
 	| from to line |
@@ -98,9 +77,10 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 	to := self elementFromTLDrawable: aTLNodeTarget.
 	
 	line := RSLine new
-		withBorderAttachPoint;
-		from: from children first;
-		to: to children first;
+		attachPoint: (RSBorderAttachPoint new
+			endOffset: 5);
+		from: from shape children first;
+		to: to shape children first;
 		yourself.
 	self applyStyle: aTLConnection effectiveStyleSheet onLine: line.
 	^ line
@@ -112,18 +92,19 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 	styleSheet := aNode effectiveStyleSheet.
 	
 	shape := self createShapeFor: aNode style: styleSheet.
-	text := self createLabelFor: aNode style: styleSheet.
+	text := self createLabelFor: aNode style: styleSheet shape: shape.
 
 	g := RSComposite new.
 	g add: shape.
 	g model: aNode.
 	g @ TLDraggable.
+	
 	g adjustToChildren.
-	text ifNotNil: [ 
-		g add: text.
-		g position: 0@0 ].
+	text ifNotNil: [ g add: text ].
 	self customizeInteractions: aNode with: g.
-	^ g
+	^ TLShapeDecorator new
+		shape: g;
+		yourself
 ]
 
 { #category : #'generation - group' }
@@ -132,17 +113,27 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 ]
 
 { #category : #'generation - node' }
-TLRoassal3Connector >> createLabelFor: aNode style: styleSheet [
-	| text  |
-	[ text := styleSheet
-		obtainValue: #nodeLabel
-		inNode: aNode ]
-		on: TLStyleSheetMissingProperty
-		do: [ :ex | ^ nil ].
-	
-	^ RSLabel new
+TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
+	| text  color  fontSize position lbl rect temp |
+	text := styleSheet getValue: #nodeLabel inNode: aNode.
+	text ifNil: [ ^ nil ].
+	color := styleSheet getValue: #textColor inNode: aNode.
+	fontSize := styleSheet getValue: #labelSize inNode: aNode.
+	position := styleSheet getValue: #nodeLabelPosition inNode: aNode.
+	rect := aRSShape encompassingRectangle.
+	lbl := RSLabel new
 		text: text;
-		yourself
+		color: color;
+		fontSize: fontSize;
+		yourself.
+	temp := RSBox new
+		fromRectangle: (Rectangle 
+			floatCenter: rect floatCenter
+			extent: rect extent + lbl extent).
+	position isString ifFalse: [
+	position := position computePositionOf: nil relativeTo: temp.
+	lbl position: position ].
+	^ lbl
 ]
 
 { #category : #'generation - legend' }
@@ -171,9 +162,7 @@ TLRoassal3Connector >> createShapeFor: aNode style: styleSheet [
 		position: 0 @ 0;
 		border: (self borderFor: aNode style: styleSheet);
 		paint: (self paintFor: aNode style: styleSheet).
-	^ TLShapeDecorator new
-		shape: shape;
-		yourself.
+	^ shape
 ]
 
 { #category : #'generation - node' }
@@ -299,6 +288,7 @@ TLRoassal3Connector >> nodesShapesAvailableForConnector [
 TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [ 
 	| window inspector lb |
 	view := RSCanvas new.
+	view inspectorContext: RSEmptyContext new.
 	view @ RSCanvasController new noLegend.
 	view @ TLDragPointCanvas.
 	aTLVisualization generateWith: self.
@@ -321,6 +311,18 @@ TLRoassal3Connector >> paintFor: aNode style: styleSheet [
 		color: color;
 		imageUrl: url asString;
 		yourself
+]
+
+{ #category : #view }
+TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [ 
+	aRSLine remove
+]
+
+{ #category : #'updating - interaction' }
+TLRoassal3Connector >> updateInteractionsOf: aDrawable [
+	self flag: #todo.	"Remove the interaction that are no longer needed and add the new ones."
+	(aDrawable allInteractions select: #isGraphicallyRepresented)
+		do: [ :aGraphicInteraction | aGraphicInteraction updateWith: self forDrawable: aDrawable ]
 ]
 
 { #category : #view }

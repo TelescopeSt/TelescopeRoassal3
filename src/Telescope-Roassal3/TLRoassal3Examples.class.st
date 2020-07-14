@@ -103,7 +103,9 @@ TLRoassal3Examples >> initialize [
 	#(exampleAdaptNodeWidthFromLabel
 	exampleAllShapes
 	exampleBackgroundImages
-	"exampleConnectionStyle
+	exampleButterflyUsingStyleFunctionnality
+	
+	exampleConnectionStyle
 	exampleCustomMultiChoiceAction
 	exampleFLowControl
 	exampleLegend
@@ -112,7 +114,7 @@ TLRoassal3Examples >> initialize [
 	exampleConnectAction
 	exampleLayoutsAngle
 	exampleGradient
-	examplePopUp").
+	examplePopUp).
 ]
 
 { #category : #public }
