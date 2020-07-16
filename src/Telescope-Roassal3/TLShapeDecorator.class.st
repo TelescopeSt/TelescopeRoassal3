@@ -56,6 +56,11 @@ TLShapeDecorator >> outgoingAdjacentNodes [
 ]
 
 { #category : #dimension }
+TLShapeDecorator >> position [
+	^ shape position
+]
+
+{ #category : #dimension }
 TLShapeDecorator >> position: aPoint [
 	shape position: aPoint
 ]

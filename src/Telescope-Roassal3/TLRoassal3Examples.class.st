@@ -47,7 +47,8 @@ TLRoassal3Examples >> createProgressShapeOn: canvas [
 		withBorder;
 		popupText: (percent * 100) asInteger asString, 
 			'% Telescope examples running without errors', String crlf,
-			total asString,'/',canvas nodes size asString ,' examples';
+			total asString,'/',canvas nodes size asString ,' examples', String crlf,
+			greenExamples size asString ,'/', canvas nodes size asString, ' green examples';
 		cornerRadius: 5;
 		noPaint;
 		yourself.
@@ -104,17 +105,18 @@ TLRoassal3Examples >> initialize [
 	exampleAllShapes
 	exampleBackgroundImages
 	exampleButterflyUsingStyleFunctionnality
+	exampleChangingLayout
 	
-	exampleConnectionStyle
-	exampleCustomMultiChoiceAction
+	exampleConnectionsCustomization
 	exampleFLowControl
-	exampleLegend
-	exampleHighlightElements
-	exampleNameCloud
-	exampleConnectAction
-	exampleLayoutsAngle
 	exampleGradient
-	examplePopUp).
+	exampleLegend
+	exampleNameCloud
+	exampleNodeLabelPosition
+	examplePackageHierarchy
+	examplePopUp
+	exampleLayoutsAngle
+	).
 ]
 
 { #category : #public }

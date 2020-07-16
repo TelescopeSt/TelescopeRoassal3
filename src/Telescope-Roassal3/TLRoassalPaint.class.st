@@ -29,6 +29,7 @@ TLRoassalPaint >> athensFillPath: aPath on: aCanvas [
 
 { #category : #accessing }
 TLRoassalPaint >> color: aColor [ 
+	aColor isColor ifFalse: [ self halt. ].
 	color := aColor
 ]
 

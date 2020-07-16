@@ -30,6 +30,33 @@ TLRoassal3Connector >> addElementNodeInView: aDecorator [
 	view add: aDecorator shape.
 ]
 
+{ #category : #view }
+TLRoassal3Connector >> allNodesFromGroup: group in: allNodes [
+	group do: [ :s | s isNode 
+		ifTrue: [ allNodes add: s ]
+		ifFalse: [ self allNodesFromGroup: s in: allNodes ]
+		 ].
+]
+
+{ #category : #view }
+TLRoassal3Connector >> applyLayoutOf: aTLGroup on: group [
+	| from to zero allNodes |	
+	allNodes := OrderedCollection new.
+	self allNodesFromGroup: group in: allNodes.
+	from := allNodes collect: #position.
+	aTLGroup layout on: group.
+	to := allNodes collect: #position.
+	zero := 0@0.
+	(from allSatisfy: [ :p | p = zero ]) ifTrue: [ ^ self ].
+	view newAnimation
+		duration: 1 seconds;
+		onStepDo: [ :t |
+			allNodes doWithIndex: [ :s :i |
+				s position: ( (from at:i) interpolateTo: (to at: i)  at: t)  ].
+			view zoomToFit.
+			].
+]
+
 { #category : #'generation - connection' }
 TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine [
 	| style line |
@@ -305,7 +332,7 @@ TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: 
 { #category : #'generation - node' }
 TLRoassal3Connector >> paintFor: aNode style: styleSheet [
 	| color url |
-	color := styleSheet backgroundColor.
+	color := styleSheet obtainValue: #backgroundColor inNode: aNode.
 	url := styleSheet attributes at: #backgroundImageUrl ifAbsent: [ nil ].
 	^ TLRoassalPaint new
 		color: color;
@@ -318,11 +345,21 @@ TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
 	aRSLine remove
 ]
 
+{ #category : #'updating - node' }
+TLRoassal3Connector >> updateElementNodeOf: aTLSimpleNode [ 
+	
+]
+
 { #category : #'updating - interaction' }
 TLRoassal3Connector >> updateInteractionsOf: aDrawable [
 	self flag: #todo.	"Remove the interaction that are no longer needed and add the new ones."
 	(aDrawable allInteractions select: #isGraphicallyRepresented)
 		do: [ :aGraphicInteraction | aGraphicInteraction updateWith: self forDrawable: aDrawable ]
+]
+
+{ #category : #'updating - legend' }
+TLRoassal3Connector >> updateLegend: aTLLegend [ 
+	
 ]
 
 { #category : #view }
