@@ -5,7 +5,7 @@ TLStyleSheet >> getValue: aString inNode: aTLNode [
 	[ ^ self
 		obtainValue: aString
 		inNode: aTLNode ]
-		on: TLStyleSheetMissingProperty
+		on: Error
 		do: [ :ex | ^ nil ].
 ]
 

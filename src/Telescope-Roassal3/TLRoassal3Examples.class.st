@@ -10,6 +10,25 @@ Class {
 	#category : #'Telescope-Roassal3-Examples'
 }
 
+{ #category : #'as yet unclassified' }
+TLRoassal3Examples >> buildLegendOn: canvas [
+	| lb |
+	lb := RSLegend new.
+	lb layout horizontal
+		gapSize: 20.
+	lb container: canvas.
+	lb defaultBox withBorder.
+	#(
+	'Error running' red
+	'Running' white
+	'Similar to Telescope' green
+	) pairsDo: [ :text :col | 
+		lb text: text withBoxColor: (Color colorFrom: col) translucent ].
+	lb location 
+		offset: 0@20.
+	lb build.
+]
+
 { #category : #public }
 TLRoassal3Examples >> createBoxFor: method [ 
 	| com |
@@ -94,6 +113,7 @@ TLRoassal3Examples >> exampleAll [
 		gapSize: 10;
 		on: canvas nodes.
 	self createProgressShapeOn: canvas.
+	self buildLegendOn: canvas.
 	^ canvas @ RSCanvasController
 ]
 
@@ -106,16 +126,41 @@ TLRoassal3Examples >> initialize [
 	exampleBackgroundImages
 	exampleButterflyUsingStyleFunctionnality
 	exampleChangingLayout
-	
+	exampleCompositeExploringHierarchy
+	exampleConnectAction
+	exampleConnectionStyle
 	exampleConnectionsCustomization
+	exampleCustomMultiChoiceAction
+	exampleCycleDependencies
+	exampleDistributionMap
+	exampleDistributionMapAbstractMethodsCollection
+	exampleExpandCollapseNodesAction
 	exampleFLowControl
 	exampleGradient
+	exampleHideAndShowConnections
+	exampleHideAndShowNode
+	exampleHighlightElements
+	exampleLabelWrap
+	exampleLayoutsAngle
 	exampleLegend
+	exampleLineStyle
+	exampleMovingNodeChangeEntity
+	exampleMovingNodeToAnotherGroup
+	exampleMovingNodeToFirstPosition
 	exampleNameCloud
 	exampleNodeLabelPosition
 	examplePackageHierarchy
 	examplePopUp
-	exampleLayoutsAngle
+	exampleSortingChildren
+	exampleSystemComplexityMultipleRoots
+	
+	"no"
+	examplePathBuilder
+	exampleRecursiveCompositeNode
+	exampleProjectMap
+	exampleSystemComplexity
+	exampleSystemComplexityInContainer
+	exampleVisualizationWithCompositeChildrenConnectionsShowing
 	).
 ]
 

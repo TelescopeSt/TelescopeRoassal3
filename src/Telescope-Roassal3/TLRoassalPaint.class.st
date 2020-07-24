@@ -7,8 +7,7 @@ Class {
 	#instVars : [
 		'color',
 		'imageUrl',
-		'firstTime',
-		'image'
+		'firstTime'
 	],
 	#category : #'Telescope-Roassal3-Utils'
 }
@@ -29,15 +28,16 @@ TLRoassalPaint >> athensFillPath: aPath on: aCanvas [
 
 { #category : #accessing }
 TLRoassalPaint >> color: aColor [ 
-	aColor isColor ifFalse: [ self halt. ].
 	color := aColor
 ]
 
 { #category : #accessing }
 TLRoassalPaint >> image [
 	| url client paint img |
+
 	imageUrl ifNil: [ ^ nil ].
-	image ifNotNil: [ ^ image ].
+	(CairoBackendCache soleInstance at: imageUrl)
+		ifNotNil: [ :image | ^ image ].
 	firstTime ifFalse: [ ^ nil ].
 	firstTime := false.
 	
@@ -54,14 +54,18 @@ TLRoassalPaint >> image [
 		createForSurface: (AthensCairoSurface 
 			fromForm: img)).
 	paint origin: (img extent /2) negated asFloatPoint.
-	image := paint.
-		] on: Error do: [ :ex | ex traceCr ]
+	CairoBackendCache soleInstance
+		at: imageUrl
+		ifAbsentPut: [ paint ].
+		] on: Error do: [ :ex | 
+		self class traceCr.
+		ex traceCr.  ]
 	 ] fork.
 	^ nil
 ]
 
 { #category : #accessing }
-TLRoassalPaint >> imageUrl: aString [ 
+TLRoassalPaint >> imageUrl: aString [
 	imageUrl := aString
 ]
 

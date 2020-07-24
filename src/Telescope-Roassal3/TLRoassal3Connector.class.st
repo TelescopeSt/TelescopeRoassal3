@@ -4,6 +4,9 @@ TODO
 Class {
 	#name : #TLRoassal3Connector,
 	#superclass : #TLViewConnector,
+	#instVars : [
+		'lastPositions'
+	],
 	#category : #'Telescope-Roassal3-Connector'
 }
 
@@ -13,8 +16,18 @@ TLRoassal3Connector class >> priority [
 ]
 
 { #category : #view }
-TLRoassal3Connector >> addElementConnectionInView: aRSLine [ 
-	view add: aRSLine
+TLRoassal3Connector >> addElementConnectionInView: aRSLine [
+	| label |
+	view add: aRSLine.
+	label := aRSLine propertyAt: #label.
+	label ifNil: [ ^ self ].
+	label := RSLabel new
+		text: label;
+		fontSize: (aRSLine propertyAt: #labelSize).
+	view add: label.
+	RSLocation new
+		center;
+		stick: label on: aRSLine
 ]
 
 { #category : #view }
@@ -31,65 +44,66 @@ TLRoassal3Connector >> addElementNodeInView: aDecorator [
 ]
 
 { #category : #view }
-TLRoassal3Connector >> allNodesFromGroup: group in: allNodes [
+TLRoassal3Connector >> allNodesFromGroup: group in: nodes [ 
 	group do: [ :s | s isNode 
-		ifTrue: [ allNodes add: s ]
-		ifFalse: [ self allNodesFromGroup: s in: allNodes ]
+		ifTrue: [ | shape |
+			shape := view shapeFromModel: s.
+			nodes at: shape ifAbsentPut: [ shape position ] ]
+		ifFalse: [ self allNodesFromGroup: s in: nodes ]
 		 ].
 ]
 
-{ #category : #view }
-TLRoassal3Connector >> applyLayoutOf: aTLGroup on: group [
-	| from to zero allNodes |	
-	allNodes := OrderedCollection new.
-	self allNodesFromGroup: group in: allNodes.
-	from := allNodes collect: #position.
-	aTLGroup layout on: group.
-	to := allNodes collect: #position.
-	zero := 0@0.
-	(from allSatisfy: [ :p | p = zero ]) ifTrue: [ ^ self ].
-	view newAnimation
-		duration: 1 seconds;
-		onStepDo: [ :t |
-			allNodes doWithIndex: [ :s :i |
-				s position: ( (from at:i) interpolateTo: (to at: i)  at: t)  ].
-			view zoomToFit.
-			].
-]
-
 { #category : #'generation - connection' }
-TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine [
-	| style line |
+TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine connection: aTLConnection [
+	| style line label |
 	style := aTLStyleSheet.
 	line := aRSLine.
+	label := style getValue: #connectionLabel inNode: aTLConnection.
+	label ifNotNil: [ 
+		aRSLine propertyAt: #label put: label.
+		aRSLine propertyAt: #labelSize put: (style getValue: #connectionLabelSize inNode: aTLConnection)
+		 ].
 	
 	line width: style width.
 	line color: style color.
+	
 	{#head->#markerEnd:}
 		do: [ :asso | | substyle shape |
 			substyle := (style copyWithout: #(#shape)) + (style > asso key).
 			shape := substyle shape roassalShape.
-			shape color: substyle color.
-			shape size: 10.
-			line perform: asso value with: shape.
-			 ]
+			shape
+				ifNil: [ line attachPoint endOffset: 0 ]
+				ifNotNil: [ 
+					shape color: substyle color.
+					shape size: 10.
+					line perform: asso value with: shape.
+				].
+		]
 	
 ]
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> borderFor: aNode style: styleSheet [
-	| color width |
+	| color width style |
 	color := styleSheet obtainValue: #borderColor inNode: aNode.
 	width := styleSheet obtainValue: #borderWidth inNode: aNode.
+	style := styleSheet getValue: #borderStyle inNode: aNode.
+	style ifNil: [ style := TLSolidLineStyle ].
 	^ RSBorder new
 		color: color;
 		width: width;
+		style: style roassalStyle;
 		yourself
 ]
 
 { #category : #'initialize-release' }
 TLRoassal3Connector >> close [
 	view morph window close
+]
+
+{ #category : #initialization }
+TLRoassal3Connector >> closeVisualization [
+	view morph root close
 ]
 
 { #category : #accessing }
@@ -99,17 +113,21 @@ TLRoassal3Connector >> connectionHeadShapesAvailableForConnector [
 
 { #category : #'generation - connection' }
 TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSource to: aTLNodeTarget [
-	| from to line |
+	| from to line style curveStyle ap lineStyle |
 	from := self elementFromTLDrawable: aTLNodeSource.
 	to := self elementFromTLDrawable: aTLNodeTarget.
-	
-	line := RSLine new
-		attachPoint: (RSBorderAttachPoint new
-			endOffset: 5);
+	style := aTLConnection effectiveStyleSheet.
+	curveStyle := style getValue: #curveStyle inNode: aTLConnection.
+	lineStyle := style getValue: #connectionLineStyle inNode: aTLConnection.
+	lineStyle ifNil: [ lineStyle := TLSolidLineStyle ].
+	line := curveStyle roassalShape.
+	line border style: lineStyle roassalStyle.
+	ap := RSBorderAttachPoint new endOffset: 5.
+	line
+		attachPoint: ap;
 		from: from shape children first;
-		to: to shape children first;
-		yourself.
-	self applyStyle: aTLConnection effectiveStyleSheet onLine: line.
+		to: to shape children first.
+	self applyStyle: style onLine: line connection: aTLConnection.
 	^ line
 ]
 
@@ -141,18 +159,26 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
-	| text  color  fontSize position lbl rect temp |
+	| text color fontSize position lbl rect temp builder wrap wrapSize |
 	text := styleSheet getValue: #nodeLabel inNode: aNode.
-	text ifNil: [ ^ nil ].
+	(text isNil or: [text =  TLNoNodeLabel] ) ifTrue: [ ^ nil ].
+	
 	color := styleSheet getValue: #textColor inNode: aNode.
 	fontSize := styleSheet getValue: #labelSize inNode: aNode.
 	position := styleSheet getValue: #nodeLabelPosition inNode: aNode.
+	wrap := styleSheet getValue: #nodeLabelWrap inNode: aNode.
+	wrapSize := styleSheet getValue: #nodeLabelMaxWidth inNode: aNode.
 	rect := aRSShape encompassingRectangle.
-	lbl := RSLabel new
+	builder := TLMultiLineLabelBuilder new.
+	builder labelShape
 		text: text;
 		color: color;
-		fontSize: fontSize;
-		yourself.
+		fontSize: fontSize.
+	builder
+		wrap: wrap;
+		wrapMaxWidth: wrapSize.
+	lbl := builder wrapShapeFor: text.
+	
 	temp := RSBox new
 		fromRectangle: (Rectangle 
 			floatCenter: rect floatCenter
@@ -182,7 +208,7 @@ TLRoassal3Connector >> createShapeFor: aNode style: styleSheet [
 		obtainValue: #shape
 		forEntity: aNode entity
 		inNode: aNode) roassalShape.
-	
+	shape ifNil: [ shape := RSBox new ].
 	shape
 		extent: (styleSheet obtainValue: #width inNode: aNode) @ 
 			(styleSheet obtainValue: #height inNode: aNode);
@@ -198,7 +224,10 @@ TLRoassal3Connector >> customizeInteractions: aNode with: aRSShape [
 ]
 
 { #category : #'generation - node' }
-TLRoassal3Connector >> define: aRSComposite asParentFor: aCollection [ 
+TLRoassal3Connector >> define: aTLShapeDecorator asParentFor: aCollection [ 
+	aCollection do: [ :s | s parent: aTLShapeDecorator ].
+	aTLShapeDecorator children: aCollection.
+	aTLShapeDecorator extent: aCollection encompassingRectangle extent + 20.
 	
 ]
 
@@ -261,14 +290,19 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 			drawable := collection first.
 			drawable effectiveStyleSheet obtainValue: #shape inNode: drawable ].
 	lb := self legendBuilder.
-	entries associationsDo: [ :labelAndColor | | com |
+	entries associationsDo: [ :labelAndColor | | com shape |
+		shape := labelAndColor value roassalShape.
+		shape 
+			ifNil: [ shape := RSBox new ]
+			ifNotNil: [ shape withBorder].
+		shape 
+			noPaint;
+			extent: 20@20.
 		com := lb 
 			text: labelAndColor key
-			withShape: (labelAndColor value roassalShape 
-				noPaint;
-				withBorder;
-				extent: 20@20).
-		com padding: 0@ 5 ].
+			withShape: (shape).
+		com padding: 0@ 5 
+	].
 	
 ]
 
@@ -334,9 +368,10 @@ TLRoassal3Connector >> paintFor: aNode style: styleSheet [
 	| color url |
 	color := styleSheet obtainValue: #backgroundColor inNode: aNode.
 	url := styleSheet attributes at: #backgroundImageUrl ifAbsent: [ nil ].
+	url ifNotNil: [ url := url asString ].
 	^ TLRoassalPaint new
 		color: color;
-		imageUrl: url asString;
+		imageUrl: url;
 		yourself
 ]
 
@@ -345,9 +380,19 @@ TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
 	aRSLine remove
 ]
 
+{ #category : #'drawing - removing' }
+TLRoassal3Connector >> removeElementFromView: element associatedToDrawable: aTLDrawable [ 
+	element shape remove
+]
+
 { #category : #'updating - node' }
-TLRoassal3Connector >> updateElementNodeOf: aTLSimpleNode [ 
-	
+TLRoassal3Connector >> updateElementNodeOf: aNode [ 
+	| g styleSheet shape |
+	g := view shapeFromModel: aNode.
+	g ifNil: [ ^ self ].
+	styleSheet := aNode effectiveStyleSheet.
+	shape := g shapes first.
+	shape border: (self borderFor: aNode style: styleSheet)
 ]
 
 { #category : #'updating - interaction' }
@@ -364,5 +409,20 @@ TLRoassal3Connector >> updateLegend: aTLLegend [
 
 { #category : #view }
 TLRoassal3Connector >> updateViewForVisualization: aTLVisualization [
-	view signalUpdate
+	| to nodes | 
+	view signalUpdate.
+	lastPositions ifNil: [ 
+		lastPositions := Dictionary new.
+		self allNodesFromGroup: aTLVisualization allNodes in: lastPositions ].
+	nodes := lastPositions.
+	to := Dictionary new.
+	nodes keysDo: [ :k | to at: k put: k position ].
+	lastPositions := to.
+	view newAnimation
+		duration: 1 seconds;
+		onStepDo: [ :t |
+			nodes keysAndValuesDo:  [ :k :v |
+				k position: (v interpolateTo: (to at: k)  at: t)  ].
+			view zoomToFit.
+			].
 ]
