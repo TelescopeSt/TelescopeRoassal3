@@ -153,14 +153,13 @@ TLRoassal3Examples >> initialize [
 	examplePopUp
 	exampleSortingChildren
 	exampleSystemComplexityMultipleRoots
-	
-	"no"
 	examplePathBuilder
-	exampleRecursiveCompositeNode
 	exampleProjectMap
 	exampleSystemComplexity
 	exampleSystemComplexityInContainer
 	exampleVisualizationWithCompositeChildrenConnectionsShowing
+	"no"
+	exampleRecursiveCompositeNode
 	).
 ]
 

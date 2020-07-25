@@ -11,6 +11,9 @@ Class {
 TLRoassal3CPBezierController >> controlPointsFor: anEdge [
 	| ap size from to |
 	ap := anEdge attachPoint.
+	anEdge from = anEdge to ifTrue: [
+		^ self selfLoopControlPointsFor: anEdge.
+		 ].
 	size := self numberOfEdgesFor: anEdge.
 	from := ap startingPointOf: anEdge.
 	to := ap endingPointOf: anEdge.
@@ -30,4 +33,21 @@ TLRoassal3CPBezierController >> numberOfEdgesFor: anEdge [
 		(ed to = to or: [ ed from = to ])
 			ifTrue: [ size := size + 1 ] ].
 	^ size
+]
+
+{ #category : #hooks }
+TLRoassal3CPBezierController >> selfLoopControlPointsFor: anEdge [
+	| temp from to delta |
+	temp := anEdge from.
+	delta := 50.
+	from := temp encompassingRectangle topCenter.
+	to := temp encompassingRectangle leftCenter.
+	temp := temp parent matrix.
+	from := temp transform: from.
+	to := temp transform: to.
+	^ Array
+		with: from 
+		with: from - (0 @ delta)
+		with: to - (delta @ 0)
+		with: to - (5 @ 0)
 ]

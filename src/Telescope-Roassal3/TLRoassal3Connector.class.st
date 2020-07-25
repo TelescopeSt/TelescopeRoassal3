@@ -306,6 +306,11 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 	
 ]
 
+{ #category : #'generation - interaction' }
+TLRoassal3Connector >> generateRightClickInteraction: aTLRightClickInteraction onDrawable: aTLSimpleNode targetingDrawable: aTLSimpleNode3 [ 
+	
+]
+
 { #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateTLColorLegendEntry: aTLColorLegendEntry [ 
 	^ aTLColorLegendEntry
@@ -383,6 +388,11 @@ TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
 { #category : #'drawing - removing' }
 TLRoassal3Connector >> removeElementFromView: element associatedToDrawable: aTLDrawable [ 
 	element shape remove
+]
+
+{ #category : #'updating - connection' }
+TLRoassal3Connector >> updateEdgeOf: aTLConnection [ 
+	
 ]
 
 { #category : #'updating - node' }
