@@ -11,3 +11,5 @@ Metacello new
     repository: 'github://TelescopeSt/TelescopeRoassal3';
     load.
 ```
+
+Note that this code snippet also loads Telescope, there is no need to load [Telescope](https://github.com/TelescopeSt/Telescope)
