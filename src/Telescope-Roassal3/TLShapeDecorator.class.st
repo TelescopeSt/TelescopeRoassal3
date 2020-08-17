@@ -26,7 +26,7 @@ TLShapeDecorator >> adjustPosition: evt [
 { #category : #accessing }
 TLShapeDecorator >> adjustToChildren [
 	| rect box |
-	rect := Rectangle merging: (self children collect: #encompassingRectangle).
+	rect := self children encompassingRectangle.
 	box := self shape shapes first.
 	box extent: rect extent+20.
 	self shape 
@@ -86,7 +86,7 @@ TLShapeDecorator >> hasChildren [
 	^ self children isNotEmpty
 ]
 
-{ #category : #dimension }
+{ #category : #'as yet unclassified' }
 TLShapeDecorator >> incomingAdjacentNodes [
 	| decorators |
 	decorators := shape canvas tlDecorators.
@@ -102,7 +102,7 @@ TLShapeDecorator >> initialize [
 	userFixedPosition := false.
 ]
 
-{ #category : #dimension }
+{ #category : #testing }
 TLShapeDecorator >> isNode [
 	^ shape isNode
 ]
@@ -112,7 +112,7 @@ TLShapeDecorator >> occupyMaxSpace [
 	^ false
 ]
 
-{ #category : #dimension }
+{ #category : #'as yet unclassified' }
 TLShapeDecorator >> outgoingAdjacentNodes [
 	| decorators |
 	decorators := shape canvas tlDecorators.
@@ -132,17 +132,23 @@ TLShapeDecorator >> parent: aTLShapeDecorator [
 	shape propertyAt: #tlparent put: aTLShapeDecorator
 ]
 
-{ #category : #dimension }
+{ #category : #accessing }
 TLShapeDecorator >> position [
 	^ shape position
 ]
 
-{ #category : #dimension }
+{ #category : #accessing }
 TLShapeDecorator >> position: aPoint [
+	| gap e |
 	self userFixedPosition ifTrue: [ ^ self ].
+	
 	shape position: aPoint.
+	self hasChildren ifFalse: [ ^ self ].
+	gap := 0@ -5.
+	e := self children encompassingRectangle.
+	
 	self children do: [ :child | 
-		child translateBy: aPoint - (shape extent / 2 ) + (10 @ 20).
+		child position: child position +((aPoint - e floatCenter))+ gap.
 		 ].
 ]
 
@@ -162,7 +168,7 @@ TLShapeDecorator >> translateBy: delta [
 	^ shape translateBy: delta
 ]
 
-{ #category : #dimension }
+{ #category : #accessing }
 TLShapeDecorator >> userFixedPosition [
 	^ userFixedPosition
 ]

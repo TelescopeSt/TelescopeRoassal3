@@ -150,7 +150,7 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 	
 	shape := self createShapeFor: aNode style: styleSheet.
 	text := self createLabelFor: aNode style: styleSheet shape: shape.
-
+	
 	g := RSComposite new.
 	g add: shape.
 	g model: aNode.
@@ -171,16 +171,15 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
-	| text color fontSize nodeLabelPosition position lbl rect temp builder wrap wrapSize |
+	| text color fontSize nodeLabelPosition lbl builder wrap wrapSize block |
 	text := styleSheet getValue: #nodeLabel inNode: aNode.
 	(text isNil or: [text =  TLNoNodeLabel] ) ifTrue: [ ^ nil ].
 	color := styleSheet getValue: #textColor inNode: aNode.
 	fontSize := styleSheet getValue: #labelSize inNode: aNode.
-	position := styleSheet getValue: #nodeLabelPosition inNode: aNode.
 	nodeLabelPosition := TLPosition for: (styleSheet getValue: #nodeLabelPosition inNode: aNode).
 	wrap := styleSheet getValue: #nodeLabelWrap inNode: aNode.
 	wrapSize := styleSheet getValue: #nodeLabelMaxWidth inNode: aNode.
-	rect := aRSShape encompassingRectangle.
+	
 	builder := TLMultiLineLabelBuilder new.
 	builder labelShape
 		text: text;
@@ -190,15 +189,19 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 		wrap: wrap;
 		wrapMaxWidth: wrapSize.
 	lbl := builder wrapShapeFor: text.
-	
-	temp := RSBox new
-		fromRectangle: (Rectangle 
-			floatCenter: rect floatCenter
-			extent: rect extent + lbl extent).
-	
-	position := nodeLabelPosition computePositionOf: nil relativeTo: temp.
-	lbl position: position.
-	
+	block := [ | temp rect position |
+		rect := aRSShape encompassingRectangle.
+			temp := RSBox new
+				fromRectangle: (Rectangle 
+				floatCenter: rect floatCenter
+				extent: rect extent + lbl extent).
+			position := nodeLabelPosition computePositionOf: nil relativeTo: temp.
+			lbl position: position.
+		 ].
+	aRSShape 
+		removeInteractionIfPresent: self class;
+		when: RSExtentChangedEvent do: block.
+	block value.
 	^ lbl
 ]
 
@@ -426,7 +429,11 @@ TLRoassal3Connector >> updateElementNodeOf: aNode [
 	shape := g shapes first.
 	shape
 		border: (self borderFor: aNode style: styleSheet);
-		paint: (self paintFor: aNode style: styleSheet).
+		paint: (self paintFor: aNode style: styleSheet);
+		extent: (styleSheet obtainValue: #width inNode: aNode) @ 
+			(styleSheet obtainValue: #height inNode: aNode).
+		
+	
 	g shapes size > 1 ifTrue: [ g shapes second remove. ].
 
 	text := self createLabelFor: aNode style: styleSheet shape: shape.
