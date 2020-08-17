@@ -247,8 +247,10 @@ TLRoassal3Connector >> generateClickInteraction: aClickInteraction onDrawable: a
 
 { #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateIconLegendEntry: aTLLegendEntry [
- 	| img |
-	img := Form fromBinaryStream: (aTLLegendEntry iconName value: CYSFileLibrary new) readStream.
+ 	| img cls |
+	cls := Smalltalk at: #CYSFileLibrary ifAbsent: [ 
+		^ aTLLegendEntry ].
+	img := Form fromBinaryStream: (aTLLegendEntry iconName value: cls new) readStream.
 	img := RSBitmap new
 		form: img;
 		yourself.
@@ -366,7 +368,10 @@ TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: 
 	view inspectorContext: RSEmptyContext new.
 	view @ RSCanvasController new noLegend.
 	view @ TLDragPointCanvas.
+	firstTimeAnimation := true.
 	aTLVisualization generateWith: self.
+	lastPositions := nil. 
+	firstTimeAnimation := false.
 	lb := self legendBuilder.
 	lb shapes ifNotEmpty: [ lb build]. 
 	
