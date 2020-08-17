@@ -406,17 +406,27 @@ TLRoassal3Connector >> removeElementFromView: element associatedToDrawable: aTLD
 
 { #category : #'updating - connection' }
 TLRoassal3Connector >> updateEdgeOf: aTLConnection [ 
+	| style line |
+	style := aTLConnection effectiveStyleSheet.
+	line := view edges shapeFromModel: aTLConnection.
+	self applyStyle: style onLine: line connection: aTLConnection.
 	
 ]
 
 { #category : #'updating - node' }
 TLRoassal3Connector >> updateElementNodeOf: aNode [ 
-	| g styleSheet shape |
+	| g styleSheet shape text |
 	g := view shapeFromModel: aNode.
 	g ifNil: [ ^ self ].
 	styleSheet := aNode effectiveStyleSheet.
 	shape := g shapes first.
-	shape border: (self borderFor: aNode style: styleSheet)
+	shape
+		border: (self borderFor: aNode style: styleSheet);
+		paint: (self paintFor: aNode style: styleSheet).
+	g shapes size > 1 ifTrue: [ g shapes second remove. ].
+
+	text := self createLabelFor: aNode style: styleSheet shape: shape.
+	text ifNotNil: [ g add: text ].
 ]
 
 { #category : #'updating - interaction' }
@@ -433,20 +443,22 @@ TLRoassal3Connector >> updateLegend: aTLLegend [
 
 { #category : #view }
 TLRoassal3Connector >> updateViewForVisualization: aTLVisualization [
-	| to nodes | 
+	| from to | 
 	view signalUpdate.
-	lastPositions ifNil: [ 
-		lastPositions := Dictionary new.
-		self allNodesFromGroup: aTLVisualization allNodes in: lastPositions ].
-	nodes := lastPositions.
+	firstTimeAnimation ifTrue: [ 
+		lastPositions := nil. 
+		firstTimeAnimation := false ].
+	lastPositions ifNil: [ ^ self ].
+	from := lastPositions.
 	to := Dictionary new.
-	nodes keysDo: [ :k | to at: k put: k position ].
-	lastPositions := to.
+	from keysDo: [ :k | to at: k put: k position ].
 	view newAnimation
 		duration: 1 seconds;
 		onStepDo: [ :t |
-			nodes keysAndValuesDo:  [ :k :v |
+			from keysAndValuesDo:  [ :k :v |
 				k position: (v interpolateTo: (to at: k)  at: t)  ].
 			view zoomToFit.
 			].
+		
+	lastPositions := nil.
 ]
