@@ -14,8 +14,9 @@ TLRoassal3CPController >> controlPointsFrom: fromPoint to: toPoint [
 	u := vector normal.
 	middle := (fromPoint + toPoint) / 2.0.
 	middle := middle - (u * 15).
-	^ Array 
+	^ {fromPoint. toPoint}
+	"^ Array 
 		with: fromPoint
 		with: middle
-		with: toPoint
+		with: toPoint"
 ]
