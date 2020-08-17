@@ -77,7 +77,7 @@ TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine connection: aTL
 	line color: style color.
 	
 	{#head->#markerEnd:}
-		do: [ :asso | | substyle shape |
+		do: [ :asso | | substyle shape marker |
 			substyle := (style copyWithout: #(#shape)) + (style > asso key).
 			shape := substyle shape roassalShape.
 			shape
@@ -85,7 +85,8 @@ TLRoassal3Connector >> applyStyle: aTLStyleSheet onLine: aRSLine connection: aTL
 				ifNotNil: [ 
 					shape color: substyle color.
 					shape size: 10.
-					line perform: asso value with: shape.
+					marker := shape asMarker. 
+					line perform: asso value with: marker.
 				].
 		]
 	
@@ -131,7 +132,7 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 	lineStyle ifNil: [ lineStyle := TLSolidLineStyle ].
 	line := curveStyle roassalShape.
 	line border style: lineStyle roassalStyle.
-	ap := RSBorderAttachPoint new endOffset: 5.
+	ap := RSBorderAttachPoint new offset: 0; endOffset: 5.
 	line
 		attachPoint: ap;
 		from: from shape children first;
