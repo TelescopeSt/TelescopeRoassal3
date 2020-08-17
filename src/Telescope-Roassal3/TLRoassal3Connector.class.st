@@ -137,6 +137,8 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 		from: from shape children first;
 		to: to shape children first.
 	self applyStyle: style onLine: line connection: aTLConnection.
+	line model: aTLConnection.
+	self customizeInteractions: aTLConnection with: line.
 	^ line
 ]
 
@@ -153,8 +155,8 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 	g model: aNode.
 	g @ TLDraggable.
 	
-	g adjustToChildren.
 	text ifNotNil: [ g add: text ].
+	g adjustToChildren.
 	self customizeInteractions: aNode with: g.
 	^ TLShapeDecorator new
 		shape: g;
@@ -168,13 +170,13 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
-	| text color fontSize position lbl rect temp builder wrap wrapSize |
+	| text color fontSize nodeLabelPosition position lbl rect temp builder wrap wrapSize |
 	text := styleSheet getValue: #nodeLabel inNode: aNode.
 	(text isNil or: [text =  TLNoNodeLabel] ) ifTrue: [ ^ nil ].
-	
 	color := styleSheet getValue: #textColor inNode: aNode.
 	fontSize := styleSheet getValue: #labelSize inNode: aNode.
 	position := styleSheet getValue: #nodeLabelPosition inNode: aNode.
+	nodeLabelPosition := TLPosition for: (styleSheet getValue: #nodeLabelPosition inNode: aNode).
 	wrap := styleSheet getValue: #nodeLabelWrap inNode: aNode.
 	wrapSize := styleSheet getValue: #nodeLabelMaxWidth inNode: aNode.
 	rect := aRSShape encompassingRectangle.
@@ -192,9 +194,10 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 		fromRectangle: (Rectangle 
 			floatCenter: rect floatCenter
 			extent: rect extent + lbl extent).
-	position isString ifFalse: [
-	position := position computePositionOf: nil relativeTo: temp.
-	lbl position: position ].
+	
+	position := nodeLabelPosition computePositionOf: nil relativeTo: temp.
+	lbl position: position.
+	
 	^ lbl
 ]
 
