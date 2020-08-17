@@ -5,7 +5,8 @@ Class {
 	#name : #TLRoassal3Connector,
 	#superclass : #TLViewConnector,
 	#instVars : [
-		'lastPositions'
+		'lastPositions',
+		'firstTimeAnimation'
 	],
 	#category : #'Telescope-Roassal3-Connector'
 }
@@ -48,9 +49,17 @@ TLRoassal3Connector >> allNodesFromGroup: group in: nodes [
 	group do: [ :s | s isNode 
 		ifTrue: [ | shape |
 			shape := view shapeFromModel: s.
-			nodes at: shape ifAbsentPut: [ shape position ] ]
+			shape ifNotNil: [ nodes at: shape ifAbsentPut: [ shape position ] ]
+			 ]
 		ifFalse: [ self allNodesFromGroup: s in: nodes ]
 		 ].
+]
+
+{ #category : #layout }
+TLRoassal3Connector >> applyLayoutOf: aTLGroup on: group [
+	lastPositions ifNil: [ lastPositions := Dictionary new ].
+	self allNodesFromGroup: aTLGroup in: lastPositions.
+	aTLGroup layout on: group.
 ]
 
 { #category : #'generation - connection' }
