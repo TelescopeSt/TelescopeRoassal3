@@ -152,6 +152,12 @@ TLShapeDecorator >> position: aPoint [
 		 ].
 ]
 
+{ #category : #removing }
+TLShapeDecorator >> remove: aTLShapeDecorator [
+	self children
+		remove: aTLShapeDecorator
+]
+
 { #category : #accessing }
 TLShapeDecorator >> shape [
 	^ shape

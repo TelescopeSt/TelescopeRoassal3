@@ -171,7 +171,7 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
-	| text color fontSize nodeLabelPosition lbl builder wrap wrapSize block |
+	| text color fontSize nodeLabelPosition lbl wrap wrapSize block builder |
 	text := styleSheet getValue: #nodeLabel inNode: aNode.
 	(text isNil or: [text =  TLNoNodeLabel] ) ifTrue: [ ^ nil ].
 	color := styleSheet getValue: #textColor inNode: aNode.
@@ -179,16 +179,15 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 	nodeLabelPosition := TLPosition for: (styleSheet getValue: #nodeLabelPosition inNode: aNode).
 	wrap := styleSheet getValue: #nodeLabelWrap inNode: aNode.
 	wrapSize := styleSheet getValue: #nodeLabelMaxWidth inNode: aNode.
-	
-	builder := TLMultiLineLabelBuilder new.
+	builder := RSMultilineLabelBuilder new.
 	builder labelShape
 		text: text;
 		color: color;
 		fontSize: fontSize.
-	builder
-		wrap: wrap;
-		wrapMaxWidth: wrapSize.
-	lbl := builder wrapShapeFor: text.
+	builder layout: (RSVerticalLineLayout new alignCenter gapSize: 1).
+	builder wrapStrategy: ((RSAbstractWrapStrategy fromTLName: wrap)
+		wrapMaxWidth: wrapSize).
+	lbl := builder shapeFor: text.
 	block := [ | temp rect position |
 		rect := aRSShape encompassingRectangle.
 			temp := RSBox new
@@ -408,7 +407,10 @@ TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
 
 { #category : #'drawing - removing' }
 TLRoassal3Connector >> removeElementFromView: element associatedToDrawable: aTLDrawable [ 
-	element shape remove
+	element shape remove.
+	element children do: [ :child | child shape remove ].
+	element children: #().
+	element parent ifNotNil: [ :parent | parent remove: element ]
 ]
 
 { #category : #'updating - connection' }
@@ -433,11 +435,11 @@ TLRoassal3Connector >> updateElementNodeOf: aNode [
 		extent: (styleSheet obtainValue: #width inNode: aNode) @ 
 			(styleSheet obtainValue: #height inNode: aNode).
 		
-	
 	g shapes size > 1 ifTrue: [ g shapes second remove. ].
 
 	text := self createLabelFor: aNode style: styleSheet shape: shape.
 	text ifNotNil: [ g add: text ].
+	g adjustToChildren.
 ]
 
 { #category : #'updating - interaction' }
