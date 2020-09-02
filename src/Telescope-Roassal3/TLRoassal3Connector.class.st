@@ -158,7 +158,7 @@ TLRoassal3Connector >> createElementNodeFromNode: aNode [
 	
 	text ifNotNil: [ g add: text ].
 	g adjustToChildren.
-	self customizeInteractions: aNode with: g.
+	self customizeInteractions: aNode with: shape.
 	^ TLShapeDecorator new
 		shape: g;
 		yourself
@@ -401,7 +401,7 @@ TLRoassal3Connector >> paintFor: aNode style: styleSheet [
 ]
 
 { #category : #view }
-TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [ 
+TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
 	aRSLine remove
 ]
 
@@ -424,7 +424,7 @@ TLRoassal3Connector >> updateEdgeOf: aTLConnection [
 
 { #category : #'updating - node' }
 TLRoassal3Connector >> updateElementNodeOf: aNode [ 
-	| g styleSheet shape text |
+	| g styleSheet shape text p |
 	g := view shapeFromModel: aNode.
 	g ifNil: [ ^ self ].
 	styleSheet := aNode effectiveStyleSheet.
@@ -439,7 +439,10 @@ TLRoassal3Connector >> updateElementNodeOf: aNode [
 
 	text := self createLabelFor: aNode style: styleSheet shape: shape.
 	text ifNotNil: [ g add: text ].
-	g adjustToChildren.
+	p := g position.
+	(g hasProperty: #decorator) ifFalse: [ g adjustToChildren. ].
+	
+	g position: p.
 ]
 
 { #category : #'updating - interaction' }

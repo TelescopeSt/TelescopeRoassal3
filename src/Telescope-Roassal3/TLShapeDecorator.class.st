@@ -48,6 +48,7 @@ TLShapeDecorator >> children: aCollection [
 { #category : #'as yet unclassified' }
 TLShapeDecorator >> defineFixedRelativePosition: aPoint [ 
 	userFixedPosition := false.
+	shape propertyAt: #decorator put: self.
 	self position: aPoint.
 	userFixedPosition :=  true.
 ]
