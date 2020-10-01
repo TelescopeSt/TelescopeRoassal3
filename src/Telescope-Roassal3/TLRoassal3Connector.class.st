@@ -300,6 +300,11 @@ TLRoassal3Connector >> generateNodeBackgroundLegendEntry: aTLNodeBackgroundLegen
 ]
 
 { #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateNodeBorderColorLegendEntry: aTLNodeBorderColorLegendEntry [ 
+	self flag: 'TODO'
+]
+
+{ #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [ 
 	| entries lb |
 	entries := aLegendEntry obtainAssociations 
@@ -326,6 +331,11 @@ TLRoassal3Connector >> generateNodeShapeLegendEntry: aLegendEntry [
 { #category : #'generation - interaction' }
 TLRoassal3Connector >> generateRightClickInteraction: aTLRightClickInteraction onDrawable: aTLSimpleNode targetingDrawable: aTLSimpleNode3 [ 
 	
+]
+
+{ #category : #'generation-legendEntry' }
+TLRoassal3Connector >> generateTLBorderColorLegendEntry: aTLBorderColorLegendEntry [ 
+	self flag: 'TODO'
 ]
 
 { #category : #'generation-legendEntry' }
