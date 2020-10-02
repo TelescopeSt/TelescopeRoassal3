@@ -8,6 +8,20 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+TLMooseExamplesExamples >> exampleMyClassButterfly [
+	<script: 'self new exampleMyClassButterfly'>
+	| b |
+	b := TLPackageButterfly new.
+	b
+		mainEntity: RSCanvas >> #zoomToFit;
+		leftEntities: [ :met | met senders collect: #compiledMethod ];
+		rightEntities: [ :met | met implementors collect: #compiledMethod ].
+
+
+	b open
+]
+
+{ #category : #'as yet unclassified' }
 TLMooseExamplesExamples >> exampleOverSimpleMethodEntity [
 	<script: 'self new exampleOverSimpleMethodEntity'>
 	| parser model context result entity butterfly |
