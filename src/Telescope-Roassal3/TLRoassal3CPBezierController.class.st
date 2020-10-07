@@ -16,6 +16,7 @@ TLRoassal3CPBezierController >> controlPointsFor: anEdge [
 		 ].
 	size := self numberOfEdgesFor: anEdge.
 	from := ap startingPointOf: anEdge.
+	"from = anEdge from parent position ifTrue: [ self halt. ]."
 	to := ap endingPointOf: anEdge.
 	^ size > 1 
 		ifTrue: [ self controlPointsFrom: from to: to ]

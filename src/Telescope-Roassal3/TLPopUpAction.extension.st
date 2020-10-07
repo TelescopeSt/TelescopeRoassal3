@@ -9,7 +9,7 @@ TLPopUpAction >> createRoassalShapeFor: aTLNode evt: aRSEvent [
 	lb := lb compositeLabelFor: text lines.
 	pos := self obtainsPositionFrom: aTLNode.
 	reversed := pos reversed.
-	point := pos computePositionOf: nil relativeTo: aRSEvent shape.
+	point := pos computePositionOf: nil relativeTo: aRSEvent shape parent.
 	point := aRSEvent camera fromSpaceToPixel: point.
 	lb 
 		padding: 10;

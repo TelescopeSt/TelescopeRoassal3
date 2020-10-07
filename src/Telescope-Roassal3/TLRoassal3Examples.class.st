@@ -12,11 +12,13 @@ Class {
 
 { #category : #'as yet unclassified' }
 TLRoassal3Examples >> buildLegendOn: canvas [
-	| lb |
+	| lb theme |
+	theme := Smalltalk ui theme.
 	lb := RSLegend new.
 	lb layout horizontal
 		gapSize: 20.
 	lb container: canvas.
+	lb defaultLabel color: theme textColor.
 	lb defaultBox withBorder.
 	#(
 	'Error running' red
@@ -31,10 +33,11 @@ TLRoassal3Examples >> buildLegendOn: canvas [
 
 { #category : #public }
 TLRoassal3Examples >> createBoxFor: method [ 
-	| com |
+	| com theme |
 	com := RSComposite new.
-	
+	theme := Smalltalk ui theme.
 	com add: (RSLabel new
+		color: theme textColor;
 		text: (method selector copyFrom: 'example' size+1 to: method selector size)).
 	com 
 		model: method;
@@ -92,8 +95,10 @@ TLRoassal3Examples >> createProgressShapeOn: canvas [
 { #category : #'as yet unclassified' }
 TLRoassal3Examples >> exampleAll [
 	<script: 'self new exampleAll open setLabel: ''Telescope Examples''; extent: 800@500'>
-	| canvas examples no |
+	| canvas examples no theme |
 	canvas := RSCanvas new.
+	theme := Smalltalk ui theme.
+	canvas color: theme backgroundColor.
 	no := 
 		{TLDemos class >> #exampleCompositeNodeWithLabelInsideInButterfly.
 		TLDemos class >> #exampleTreeExplorerCollectionHierarchy.

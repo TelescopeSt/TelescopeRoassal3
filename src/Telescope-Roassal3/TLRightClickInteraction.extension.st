@@ -1,7 +1,7 @@
-Extension { #name : #TLClickInteraction }
+Extension { #name : #TLRightClickInteraction }
 
 { #category : #'*Telescope-Roassal3' }
-TLClickInteraction >> onRoassalShape: aShape with: aNode [
+TLRightClickInteraction >> onRoassalShape: aShape with: aNode [
 	self flag: #TODO. "issue with HideAndShowConnections"
 	"This shape has 2 times this interaction
 	- one for show
@@ -9,7 +9,7 @@ TLClickInteraction >> onRoassalShape: aShape with: aNode [
 	But update runs twice, then this produces a bad animation.
 	Will be nice to have one RSMouseClick to run all thhe click interactions in this
 	shape and then call update"
-	aShape when: RSMouseClick do: [ :evt |
+	aShape when: RSMouseRightClick do: [ :evt |
 		self actionOn: aNode.
 		aNode visualization update
 		 ].
