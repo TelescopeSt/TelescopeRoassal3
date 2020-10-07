@@ -17,8 +17,8 @@ In Pharo 9, you may want to use the following script (in order to avoid odd warn
 
 ```Smalltalk
 [Metacello new
-    baseline: 'Roassal3';
-    repository: 'github://ObjectProfile/Roassal3';
+    baseline: 'TelescopeRoassal3';
+    repository: 'github://TelescopeSt/TelescopeRoassal3';
     load ] on: MCMergeOrLoadWarning do: [:warning | warning load ]
 ```  
 
