@@ -1,5 +1,5 @@
 # TelescopeRoassal3
-[![Build Status](https://travis-ci.com/bergel/TelescopeRoassalBridge.svg?branch=master)](https://travis-ci.com/bergel/TelescopeRoassalBridge)
+[![Build Status](https://travis-ci.com/bergel/TelescopeRoassalBridge.svg?branch=main)](https://travis-ci.com/bergel/TelescopeRoassalBridge)
 
 A connector to Roassal3 graphic engine
 
