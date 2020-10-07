@@ -363,7 +363,7 @@ TLRoassal3Connector >> legendBuilder [
 	^ view propertyAt: #lb ifAbsentPut: [ 
 		RSLegend new
 			container: view;
-			leyendDo: [ :s | 
+			legendDo: [ :s | 
 				s
 					withBorder; 
 					color: (Color white alpha: 0.7);
