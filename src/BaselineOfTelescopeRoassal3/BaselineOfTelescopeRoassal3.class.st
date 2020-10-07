@@ -22,12 +22,15 @@ BaselineOfTelescopeRoassal3 >> baseline: spec [
 			
 			"The packages to use, but not load"
 			spec
-				package: #'Telescope-Roassal3' with: [ spec requires: #('Roassal3' 'Telescope') ].
+				package: #'Telescope-Roassal3' with: [ spec requires: #('Roassal3' 'Telescope') ];
+				package: #'Telescope-Roassal3-Tests'.
 
 			"packages to load"
 			
 			spec 
-				group: 'default' with: #('Telescope-Roassal3') ].
+				group: 'default' with: #(
+					'Telescope-Roassal3'
+					'Telescope-Roassal3-Tests') ].
 
 		
 	
