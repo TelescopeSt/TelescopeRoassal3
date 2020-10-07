@@ -45,14 +45,15 @@ TLRoassal3Connector >> addElementNodeInView: aDecorator [
 ]
 
 { #category : #view }
-TLRoassal3Connector >> allNodesFromGroup: group in: nodes [ 
-	group do: [ :s | s isNode 
-		ifTrue: [ | shape |
-			shape := view shapeFromModel: s.
-			shape ifNotNil: [ nodes at: shape ifAbsentPut: [ shape position ] ]
-			 ]
-		ifFalse: [ self allNodesFromGroup: s in: nodes ]
-		 ].
+TLRoassal3Connector >> allNodesFromGroup: group in: nodes [
+
+	group do: [ :s | 
+		s isNode
+			ifTrue: [ 
+				| shape |
+				shape := view shapeFromModel: s.
+				shape ifNotNil: [ nodes at: shape ifAbsentPut: [ shape position ] ] ]
+			ifFalse: [ self allNodesFromGroup: s in: nodes ] ]
 ]
 
 { #category : #layout }
@@ -108,6 +109,7 @@ TLRoassal3Connector >> borderFor: aNode style: styleSheet [
 
 { #category : #'initialize-release' }
 TLRoassal3Connector >> close [
+	"Close the window"
 	view morph window close
 ]
 
@@ -173,7 +175,7 @@ TLRoassal3Connector >> createGroup: aTLEntitiesGroup with: aCollection [
 TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 	| text color fontSize nodeLabelPosition lbl wrap wrapSize block builder |
 	text := styleSheet getValue: #nodeLabel inNode: aNode.
-	(text isNil or: [text =  TLNoNodeLabel] ) ifTrue: [ ^ nil ].
+	(text isNil or: [text = TLNoNodeLabel] ) ifTrue: [ ^ nil ].
 	color := styleSheet getValue: #textColor inNode: aNode.
 	fontSize := styleSheet getValue: #labelSize inNode: aNode.
 	nodeLabelPosition := TLPosition for: (styleSheet getValue: #nodeLabelPosition inNode: aNode).

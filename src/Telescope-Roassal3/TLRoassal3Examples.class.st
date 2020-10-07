@@ -10,7 +10,7 @@ Class {
 	#category : #'Telescope-Roassal3-Examples'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 TLRoassal3Examples >> buildLegendOn: canvas [
 	| lb theme |
 	theme := Smalltalk ui theme.
@@ -51,7 +51,7 @@ TLRoassal3Examples >> createBoxFor: method [
 	^ com 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 TLRoassal3Examples >> createProgressShapeOn: canvas [
 	| rect w red total b1 b2 percent |
 	rect := canvas encompassingRectangle.
@@ -92,7 +92,7 @@ TLRoassal3Examples >> createProgressShapeOn: canvas [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 TLRoassal3Examples >> exampleAll [
 	<script: 'self new exampleAll open setLabel: ''Telescope Examples''; extent: 800@500'>
 	| canvas examples no theme |
@@ -179,7 +179,7 @@ TLRoassal3Examples >> openExample: evt [
 	do: [ :ex | met browse ].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 TLRoassal3Examples >> testExample: evt [
 	| shape res sel |
 	shape := evt shape.
