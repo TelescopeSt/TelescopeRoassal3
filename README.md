@@ -46,7 +46,7 @@ b
 	rightEntities: [ :met | met implementors collect: #compiledMethod ].
 b open
 ```
-![alt](images/butterfly1.png)
+![alt](images/image3.png)
 
 In case you are using Moose, here is a similar example that uses the Moose platform instead:
 ```Smalltalk
