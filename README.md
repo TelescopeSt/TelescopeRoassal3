@@ -38,12 +38,13 @@ Each box is an example of Telescope that is run using the Roassal3 bridge. A gre
 The Roassal3 bridge contains the class `TLPackageButterfly` that defines the butterfly visualization. As shown in the method `TLMooseExamplesExamples>>exampleMyClassButterfly`, one can open the butterfly visualization on any Pharo compiled method using:
 
 ```Smalltalk
-	b := TLPackageButterfly new.
-	b
-		mainEntity: RSCanvas >> #zoomToFit;
-		leftEntities: [ :met | met senders collect: #compiledMethod ];
-		rightEntities: [ :met | met implementors collect: #compiledMethod ].
-	b 
+| b |
+b := TLMyDemoButterfly new.
+b
+	mainEntity: {RSCanvas >> #zoomToFit. RSCanvas >> #privateEdges};
+	leftEntities: [ :met | met senders collect: #compiledMethod ];
+	rightEntities: [ :met | met implementors collect: #compiledMethod ].
+b open
 ```
 ![alt](images/butterfly1.png)
 
