@@ -9,12 +9,14 @@ Class {
 
 { #category : #visualization }
 TLMooseExamplesExamples >> exampleMyClassButterfly [
-	<script: 'self new exampleMyClassButterfly'>
+	<script: 'self new exampleMyClassButterfly open'>
+	<tlFilter: #style>
+	<tlFilter: #visuTemplate>
 	| b |
-	b := TLPackageButterfly new.
+	b := TLMyDemoButterfly new.
 	b
-		mainEntity: RSCanvas >> #zoomToFit;
+		mainEntity: {RSCanvas >> #zoomToFit. RSCanvas >> #privateEdges};
 		leftEntities: [ :met | met senders collect: #compiledMethod ];
 		rightEntities: [ :met | met implementors collect: #compiledMethod ].
-	b open
+	^ b
 ]
