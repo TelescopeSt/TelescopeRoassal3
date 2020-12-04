@@ -33,7 +33,6 @@ TLDraggable >> key [
 
 { #category : #hooks }
 TLDraggable >> onShape: aShape [
-	aShape draggable.
 	aShape
 		when: RSMouseDragStart send: #createBox: to: self;
 		when: RSMouseDragging send: #updateBox: to: self;
@@ -52,7 +51,13 @@ TLDraggable >> removeBox: evt [
 
 { #category : #hooks }
 TLDraggable >> updateBox: evt [
-	| box |
+	| box d node deco |
+	d := evt camera distanceFromPixelToSpace: evt step.
+	node := evt shape model.
+	deco := node generator shapeByDrawable at: node.
+	deco translateBy: d.
+	deco parent ifNotNil: #adjustToChildren.
 	box := self getBoxFrom: evt.
 	box position: evt shape position.
+	evt signalUpdate.
 ]

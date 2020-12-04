@@ -43,9 +43,7 @@ TLRoassal3CPBezierController >> selfLoopControlPointsFor: anEdge [
 	delta := 50.
 	from := temp encompassingRectangle topCenter.
 	to := temp encompassingRectangle leftCenter.
-	temp := temp parent matrix.
-	from := temp transform: from.
-	to := temp transform: to.
+	
 	^ Array
 		with: from 
 		with: from - (0 @ delta)

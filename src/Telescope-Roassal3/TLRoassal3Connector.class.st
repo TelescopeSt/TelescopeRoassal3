@@ -48,10 +48,14 @@ TLRoassal3Connector >> addElementLegendInView: legend [
 
 { #category : #view }
 TLRoassal3Connector >> addElementNodeInView: aDecorator [
-	| arr |
+	| arr shape |
 	arr := view tlDecorators.
-	arr at: aDecorator shape children first put: aDecorator.
-	view add: aDecorator shape.
+	shape := aDecorator shape.
+	arr at: shape put: aDecorator.
+	
+	view add: shape.
+	aDecorator label 
+		ifNotNil: [ :label | view add: label ].
 ]
 
 { #category : #view }
@@ -150,8 +154,8 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 	ap := RSBorderAttachPoint new offset: 0; endOffset: 5.
 	line
 		attachPoint: ap;
-		from: from shape children first;
-		to: to shape children first.
+		from: from shape;
+		to: to shape.
 	self applyStyle: style onLine: line connection: aTLConnection.
 	line model: aTLConnection.
 	self customizeInteractions: aTLConnection with: line.
@@ -160,22 +164,20 @@ TLRoassal3Connector >> createElementConnection: aTLConnection From: aTLNodeSourc
 
 { #category : #'generation - node' }
 TLRoassal3Connector >> createElementNodeFromNode: aNode [
-	| styleSheet text shape g |
+	| styleSheet text shape |
 	styleSheet := aNode effectiveStyleSheet.
 	
 	shape := self createShapeFor: aNode style: styleSheet.
 	text := self createLabelFor: aNode style: styleSheet shape: shape.
 	
-	g := RSComposite new.
-	g add: shape.
-	g model: aNode.
-	g @ TLDraggable.
+	shape 
+		model: aNode;
+		addInteraction: TLDraggable.
 	
-	text ifNotNil: [ g add: text ].
-	g adjustToChildren.
 	self customizeInteractions: aNode with: shape.
 	^ TLShapeDecorator new
-		shape: g;
+		shape: shape;
+		label: text;
 		yourself
 ]
 
@@ -212,9 +214,10 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 			position := nodeLabelPosition computePositionOf: nil relativeTo: temp.
 			lbl position: position.
 		 ].
-	aRSShape 
+	"aRSShape 
 		removeInteractionIfPresent: self class;
-		when: RSExtentChangedEvent do: block.
+		when: RSExtentChangedEvent do: block;
+		when: RSPositionChangedEvent do: block."
 	block value.
 	^ lbl
 ]
@@ -222,7 +225,6 @@ TLRoassal3Connector >> createLabelFor: aNode style: styleSheet shape: aRSShape [
 { #category : #'generation - legend' }
 TLRoassal3Connector >> createLegendFrom: legendItems [
 	"TODO"
-	
 ]
 
 { #category : #'generation - interaction' }
@@ -313,7 +315,19 @@ TLRoassal3Connector >> generateMultiChoiceMenuInteraction: anInteraction onDrawa
 
 { #category : #'generation-legendEntry' }
 TLRoassal3Connector >> generateNodeBackgroundLegendEntry: aTLNodeBackgroundLegendEntry [ 
-	
+	^ (aTLNodeBackgroundLegendEntry obtainAssociations
+		collect: [ :collection | 
+			| drawable |
+			drawable := collection anyOne.
+			drawable effectiveStyleSheet 
+				obtainValue: #backgroundColor 
+				forEntity: drawable entity 
+				inNode: drawable ])
+		associationsDo: [ :assoc |
+			self legendBuilder 
+				text: assoc key
+				withBoxColor: assoc value
+			 ]
 ]
 
 { #category : #'generation-legendEntry' }
@@ -396,11 +410,13 @@ TLRoassal3Connector >> nodesShapesAvailableForConnector [
 
 { #category : #opening }
 TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [ 
-	| window inspector lb |
+	| window inspector lb controller |
 	view := RSCanvas new.
 	view inspectorContext: RSEmptyContext new.
-	view @ RSCanvasController new noLegend.
-	view @ TLDragPointCanvas.
+	controller := RSCanvasController new noLegend.
+	view
+		@ controller;
+		@ TLDragPointCanvas.
 	firstTimeAnimation := true.
 	aTLVisualization generateWith: self.
 	lastPositions := nil. 
@@ -429,12 +445,14 @@ TLRoassal3Connector >> paintFor: aNode style: styleSheet [
 
 { #category : #view }
 TLRoassal3Connector >> removeElementConnectionFromView: aRSLine [
-	aRSLine remove
+	aRSLine remove.
+	(aRSLine propertyAt: #label) ifNotNil: [ :label | label remove ].
 ]
 
 { #category : #'drawing - removing' }
 TLRoassal3Connector >> removeElementFromView: element associatedToDrawable: aTLDrawable [ 
 	element shape remove.
+	element label ifNotNil: [ :label | label remove ].
 	element children do: [ :child | child shape remove ].
 	element children: #().
 	element parent ifNotNil: [ :parent | parent remove: element ]
@@ -451,25 +469,28 @@ TLRoassal3Connector >> updateEdgeOf: aTLConnection [
 
 { #category : #'updating - node' }
 TLRoassal3Connector >> updateElementNodeOf: aNode [ 
-	| g styleSheet shape text p |
-	g := view shapeFromModel: aNode.
-	g ifNil: [ ^ self ].
+	| styleSheet deco shape text |
+	deco := shapeByDrawable at: aNode.
+	deco ifNil: [ ^ self ].
+	shape := deco shape.
+	
 	styleSheet := aNode effectiveStyleSheet.
-	shape := g shapes first.
+	
 	shape
 		border: (self borderFor: aNode style: styleSheet);
 		paint: (self paintFor: aNode style: styleSheet);
 		extent: (styleSheet obtainValue: #width inNode: aNode) @ 
 			(styleSheet obtainValue: #height inNode: aNode).
-		
-	g shapes size > 1 ifTrue: [ g shapes second remove. ].
-
-	text := self createLabelFor: aNode style: styleSheet shape: shape.
-	text ifNotNil: [ g add: text ].
-	p := g position.
-	(g hasProperty: #decorator) ifFalse: [ g adjustToChildren. ].
 	
-	g position: p.
+	deco label ifNotNil: [ :label | label remove ].
+	
+	text := self createLabelFor: aNode style: styleSheet shape: shape.
+	
+	text ifNotNil: [ 
+		deco label: text.
+		view add: text. ].
+	
+	
 ]
 
 { #category : #'updating - interaction' }
@@ -485,23 +506,59 @@ TLRoassal3Connector >> updateLegend: aTLLegend [
 ]
 
 { #category : #view }
+TLRoassal3Connector >> updatePositionWithAnimation: aTLVisualization [
+	| from to iterate oldCameraS oldCameraP newCameraS newCameraP |
+	from := lastPositions.
+	
+	to := Dictionary new.
+	from keysDo: [ :k | 
+		| p newP deco |
+		p := from at: k.
+		deco := self shapeByDrawable at: k model.
+		"p = (0@0) ifTrue: [ from at: k put: k position ]."
+		newP := k position.
+		to at: k put: newP ].
+	iterate := nil.
+	iterate := [ :aNode :t |
+		aNode do: [ :child |
+			child isNode ifTrue: [ 
+				child isComposite 
+					ifTrue: [ iterate value: child childrenNodes value: t ].
+				self shapeByDrawable at: child ifPresent: [:deco | 
+					| oldP newP |	
+					oldP := from at: deco shape ifAbsent: [ deco position ].
+					newP := oldP interpolateTo: (to at: deco shape ifAbsent: [ deco position ]) at: t.
+					deco position: newP.
+					].
+				
+			] ifFalse: [
+				iterate value: child value: t.
+			].
+		] 
+	].
+	oldCameraS := view camera scale.
+	oldCameraP := view camera position.
+	view zoomToFit.
+	newCameraS := view camera scale.
+	newCameraP := view camera position.
+	view newAnimation
+		duration: 1 seconds;
+		onStepDo: [ :t |
+			iterate value: aTLVisualization value: t.
+			view camera
+				position: (oldCameraP interpolateTo: newCameraP at: t);
+				scale: (oldCameraS interpolateTo: newCameraS at: t).
+			view signalUpdate.
+			].
+]
+
+{ #category : #view }
 TLRoassal3Connector >> updateViewForVisualization: aTLVisualization [
-	| from to | 
 	view signalUpdate.
 	firstTimeAnimation ifTrue: [ 
 		lastPositions := nil. 
 		firstTimeAnimation := false ].
 	lastPositions ifNil: [ ^ self ].
-	from := lastPositions.
-	to := Dictionary new.
-	from keysDo: [ :k | to at: k put: k position ].
-	view newAnimation
-		duration: 1 seconds;
-		onStepDo: [ :t |
-			from keysAndValuesDo:  [ :k :v |
-				k position: (v interpolateTo: (to at: k)  at: t)  ].
-			view zoomToFit.
-			].
-		
+	self updatePositionWithAnimation: aTLVisualization.
 	lastPositions := nil.
 ]

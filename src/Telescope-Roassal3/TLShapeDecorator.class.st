@@ -6,46 +6,44 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'shape',
-		'userFixedPosition'
+		'userFixedPosition',
+		'position',
+		'children',
+		'dimension',
+		'parent',
+		'encompassingRectangle',
+		'label'
 	],
 	#category : #'Telescope-Roassal3-Utils'
 }
 
 { #category : #accessing }
-TLShapeDecorator >> adjustPosition: evt [
-	| delta |
-	delta := evt newPosition - evt oldPosition.
-	self children do: [ :child | 
-		child translateBy: delta.
-		].
-	self parent ifNotNil: #adjustToChildren.
-	
-	
-]
-
-{ #category : #accessing }
 TLShapeDecorator >> adjustToChildren [
-	| rect box |
+	| rect |
 	rect := self children encompassingRectangle.
-	box := self shape shapes first.
-	box extent: rect extent+20.
-	self shape 
-		position: rect floatCenter;
-		extent: box extent.
+	
+	shape position: (position := rect floatCenter).
+	
+	self extent: self dimension.
 	self parent ifNotNil: #adjustToChildren.
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> children [
-	^ shape propertyAt: #tlchildren ifAbsent: [ #() ]
+	^ children ifNil: [ #() ]
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> children: aCollection [
-	shape propertyAt: #tlchildren put: aCollection
+	children := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #geometry }
+TLShapeDecorator >> clearBB [
+	encompassingRectangle := nil.
+]
+
+{ #category : #accessing }
 TLShapeDecorator >> defineFixedRelativePosition: aPoint [ 
 	userFixedPosition := false.
 	shape propertyAt: #decorator put: self.
@@ -57,29 +55,48 @@ TLShapeDecorator >> defineFixedRelativePosition: aPoint [
 TLShapeDecorator >> dimension [
 	^ self hasChildren
 		ifTrue: [ self children extent + 20 ]
-		ifFalse: [ shape extent ]
+		ifFalse: [ dimension ifNil: [ dimension := shape extent ] ]
 	
+]
+
+{ #category : #dimension }
+TLShapeDecorator >> dimension: aPoint [
+	dimension := aPoint.
+	self clearBB.
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> encompassingRectangle [
-	^ Rectangle center: self position extent: self dimension
+	^ encompassingRectangle ifNil: [
+		| rects rect |
+		rects := OrderedCollection new: 2.
+		rect := Rectangle floatCenter: self position extent: self dimension.
+		rects add: rect.
+		label ifNotNil: [
+			rects add: label encompassingRectangle ].
+		encompassingRectangle := Rectangle merging: rects.
+		
+		encompassingRectangle
+	].
+	
 ]
 
 { #category : #geometry }
 TLShapeDecorator >> extent: aPoint [
 	| node |
-	shape extent: aPoint.
-	shape shapes first extent: aPoint.
-	shape shapes size < 2 ifTrue: [ ^ self ].
+	self dimension: aPoint.
 	
-	shape shapes second remove.
+	shape extent: aPoint.
+	
+	label ifNil: [ ^ self ].
+
+	label remove.
 	node := shape model.
-	shape add: (node generator 
+	label := node generator 
 		createLabelFor: node 
 		style: node effectiveStyleSheet 
-		shape: shape shapes first).
-	
+		shape: shape.
+	shape canvas ifNotNil: [ :canvas | canvas add: label ].
 ]
 
 { #category : #accessing }
@@ -87,12 +104,12 @@ TLShapeDecorator >> hasChildren [
 	^ self children isNotEmpty
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 TLShapeDecorator >> incomingAdjacentNodes [
 	| decorators |
 	decorators := shape canvas tlDecorators.
 	
-	^ shape children first incomingEdges
+	^ shape incomingEdges
 		collect: [ :ed |
 			decorators at: ed from ].
 ]
@@ -108,55 +125,71 @@ TLShapeDecorator >> isNode [
 	^ shape isNode
 ]
 
+{ #category : #accessing }
+TLShapeDecorator >> label [
+	^ label
+]
+
+{ #category : #accessing }
+TLShapeDecorator >> label: aRSLabel [
+	label := aRSLabel.
+	self clearBB.
+]
+
 { #category : #dimension }
 TLShapeDecorator >> occupyMaxSpace [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 TLShapeDecorator >> outgoingAdjacentNodes [
 	| decorators |
 	decorators := shape canvas tlDecorators.
 	
-	^ shape children first outgoingEdges
+	^ shape outgoingEdges
 		collect: [ :ed |
 			decorators at: ed to ].
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> parent [
-	^ shape propertyAt: #tlparent
+	^ parent
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> parent: aTLShapeDecorator [
-	shape propertyAt: #tlparent put: aTLShapeDecorator
+	parent := aTLShapeDecorator
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> position [
-	^ shape position
+	^ position
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> position: aPoint [
-	| gap e |
+	| rect gap |
+	self clearBB.
 	self userFixedPosition ifTrue: [ ^ self ].
-	
-	shape position: aPoint.
+	position := aPoint.
+	shape translateTo: aPoint.
+	self extent: self dimension.
 	self hasChildren ifFalse: [ ^ self ].
-	gap := 0@ -5.
-	e := self children encompassingRectangle.
-	
+	rect := self children encompassingRectangle.
+	gap := 20.
 	self children do: [ :child | 
-		child position: child position +((aPoint - e floatCenter))+ gap.
-		 ].
+		child position: child position + aPoint - rect floatCenter].
+	
+	
 ]
 
 { #category : #removing }
 TLShapeDecorator >> remove: aTLShapeDecorator [
+	
 	self children
-		remove: aTLShapeDecorator
+		remove: aTLShapeDecorator.
+	dimension := nil.
+	self clearBB.
 ]
 
 { #category : #accessing }
@@ -167,12 +200,13 @@ TLShapeDecorator >> shape [
 { #category : #accessing }
 TLShapeDecorator >> shape: aRSShape [
 	shape := aRSShape.
-	shape when: RSPositionChangedEvent send: #adjustPosition: to: self. 
+	"shape when: RSPositionChangedEvent send: #adjustPosition: to: self."
 ]
 
 { #category : #accessing }
 TLShapeDecorator >> translateBy: delta [
-	^ shape translateBy: delta
+	
+	self position: self position + delta
 ]
 
 { #category : #accessing }
