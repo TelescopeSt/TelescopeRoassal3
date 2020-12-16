@@ -5,7 +5,7 @@ RSAthensRenderer >> visitDoubleBorder: border [
 	self visitBorder: border.
 	athensCanvas draw.
 	self visitBorder: (RSBorder new
-		width: border width / 2;
+		width: border width / 4;
 		color: Color white;
 		yourself). 
 ]
