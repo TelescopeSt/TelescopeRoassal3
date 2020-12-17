@@ -9,7 +9,7 @@ TLClickInteraction >> onRoassalShape: aShape with: aNode [
 	But update runs twice, then this produces a bad animation.
 	Will be nice to have one RSMouseClick to run all thhe click interactions in this
 	shape and then call update"
-	aShape when: RSMouseClick do: [ :evt |
+	aShape when: RSMouseLeftClick do: [ :evt |
 		self actionOn: aNode.
 		aNode visualization update
 		 ].

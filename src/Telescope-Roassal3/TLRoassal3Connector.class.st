@@ -538,6 +538,7 @@ TLRoassal3Connector >> updatePositionWithAnimation: aTLVisualization [
 	].
 	oldCameraS := view camera scale.
 	oldCameraP := view camera position.
+	view removeKey: #encompassingRectangle.
 	view zoomToFit.
 	newCameraS := view camera scale.
 	newCameraP := view camera position.
