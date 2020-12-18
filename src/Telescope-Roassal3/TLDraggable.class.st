@@ -55,8 +55,13 @@ TLDraggable >> updateBox: evt [
 	d := evt camera distanceFromPixelToSpace: evt step.
 	node := evt shape model.
 	deco := node generator shapeByDrawable at: node.
-	deco translateBy: d.
-	deco parent ifNotNil: #adjustToChildren.
+	deco userFixedPosition ifTrue: [
+		deco shape translateBy: d.
+	] ifFalse: [ 
+		deco translateBy: d.
+		deco parent ifNotNil: #adjustToChildren.
+		 ].
+	
 	box := self getBoxFrom: evt.
 	box position: evt shape position.
 	evt signalUpdate.
