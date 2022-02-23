@@ -409,26 +409,26 @@ TLRoassal3Connector >> nodesShapesAvailableForConnector [
 ]
 
 { #category : #opening }
-TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [ 
-	| window inspector lb controller |
+TLRoassal3Connector >> open: aTLVisualization inWindowSized: aDimension titled: aString [
+
+	| inspector lb controller |
 	view := RSCanvas new.
-	view inspectorContext: RSEmptyContext new.
+	view inspectorContext: RSEmptyContextInteraction new.
 	controller := RSCanvasController new noLegend.
 	view
 		@ controller;
 		@ TLDragPointCanvas.
 	firstTimeAnimation := true.
 	aTLVisualization generateWith: self.
-	lastPositions := nil. 
+	lastPositions := nil.
 	firstTimeAnimation := false.
 	lb := self legendBuilder.
-	lb shapes ifNotEmpty: [ lb build]. 
-	
-	inspector := GTInspector new.
-	window := inspector openOn: view.
-	inspector title: aString.
-	window extent: aDimension.
-	
+	lb shapes ifNotEmpty: [ lb build ].
+
+	inspector := Smalltalk tools inspector openOn: view.
+	inspector window
+		title: aString;
+		extent: aDimension
 ]
 
 { #category : #'generation - node' }
