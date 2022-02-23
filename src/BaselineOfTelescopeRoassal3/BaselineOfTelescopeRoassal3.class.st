@@ -12,7 +12,7 @@ BaselineOfTelescopeRoassal3 >> baseline: spec [
 
 	<baseline>
 	self pharo8: spec.
-	self pharo9: spec.
+	self pharo9AndLater: spec.
 
 	spec for: #common do: [ 
 		spec
@@ -39,9 +39,9 @@ BaselineOfTelescopeRoassal3 >> pharo8: spec [
 ]
 
 { #category : #baselines }
-BaselineOfTelescopeRoassal3 >> pharo9: spec [
+BaselineOfTelescopeRoassal3 >> pharo9AndLater: spec [
 
-	spec for: #'pharo9.x' do: [ 
+	spec for: #( #'pharo9.x' #'pharo10.x' ) do: [ 
 		spec
 			package: #'Telescope-Roassal3'
 			with: [ spec requires: #( 'Telescope' ) ] ]
