@@ -11,15 +11,17 @@ Class {
 BaselineOfTelescopeRoassal3 >> baseline: spec [
 
 	<baseline>
-	self pharo8: spec.
-	self pharo9AndLater: spec.
-
-	spec for: #common do: [ 
+	spec for: #common do: [
 		spec
 			baseline: 'Telescope'
-			with: [ 
+			with: [
 			spec repository: 'github://TelescopeSt/Telescope:v2.x.x/src' ].
+		spec
+			package: #'Telescope-Roassal3'
+			with: [ spec requires: #( 'Telescope' ) ].
 		spec package: #'Telescope-Roassal3-Tests'.
+
+		self pharo8: spec.
 
 		spec
 			group: 'default'
@@ -36,13 +38,4 @@ BaselineOfTelescopeRoassal3 >> pharo8: spec [
 		spec
 			package: #'Telescope-Roassal3'
 			with: [ spec requires: #( 'Roassal3' 'Telescope' ) ] ]
-]
-
-{ #category : #baselines }
-BaselineOfTelescopeRoassal3 >> pharo9AndLater: spec [
-
-	spec for: #( #'pharo9.x' #'pharo10.x' ) do: [ 
-		spec
-			package: #'Telescope-Roassal3'
-			with: [ spec requires: #( 'Telescope' ) ] ]
 ]
